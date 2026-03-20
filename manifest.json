@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Gestão MB 2026",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Gestão MB",
+  "start_url": "/Gest-o-20206/",
+  "theme_color": "#ffffff",
+  "description": "Estudo para prova de gestão 2026",
+  "lang": "pt"
+}
