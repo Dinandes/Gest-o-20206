@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão 2026 — Marinha do Brasil</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0f1e; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+const { useState, useRef } = React;
+
+
+const COR = {
+  bg:"#0a0f1e", card:"#111827", brd:"#1e3a5f",
+  accent:"#00bfff", gold:"#ffd700", green:"#00e676",
+  red:"#ff5252", orange:"#ff9500", purple:"#bb88ff"
+};
+
+// ─── DADOS ────────────────────────────────────────────────────────────────────
+const TOPICS = [
+  { id:1, title:"Qualidade — Fundamentos", icon:"🏆", color:"#1a6b4a",
+    subtopics:[
+      {title:"Definição Oficial (Q.6)", text:"A Qualidade é o conjunto das propriedades e características de um produto, processo ou serviço, que lhe fornecem a capacidade de satisfazer as necessidades explícitas ou implícitas."},
+      {title:"Qualidade Total (Q.7)", text:"É o processo utilizado para garantir o atendimento às necessidades e expectativas dos clientes."},
+      {title:"Custo da Qualidade (Q.8)", text:"É a expressão usada para indicar dinheiro gasto para prevenir, avaliar e corrigir problemas, desperdícios e falhas de serviços e produtos."},
+      {title:"Trilogia de Juran (Q.1)", text:"• Planejamento da qualidade\n• Controle da qualidade\n• Aperfeiçoamento da qualidade"}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Trilogia Juran — PCA", texto:"PCA = Preciso Controlar Aprimorando\nPlanejamento → Controle → Aperfeiçoamento"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"Custo da Qualidade = dinheiro para PREVENIR + AVALIAR + CORRIGIR.\nNão confunda com o preço do produto!"},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha", texto:"Juran fala em 'Aperfeiçoamento', NÃO em 'Melhoria Contínua'.\nMelhoria Contínua = Kaizen (conceito diferente!)."}
+    ]
+  },
+  { id:2, title:"Eras da Qualidade", icon:"📜", color:"#1a3d6b",
+    subtopics:[
+      {title:"As 4 Eras (Q.2)", text:"1ª Era da Inspeção\n2ª Era do Controle Estatístico da Qualidade\n3ª Era da Garantia da Qualidade\n4ª Era da Gestão da Qualidade Total"},
+      {title:"Era da Inspeção (Q.3)", text:"Apoia-se em um sistema de medidas, utilizando-se de gabaritos e outros acessórios e de um padrão de referência."},
+      {title:"Controle Estatístico", text:"Uso de técnicas estatísticas para monitorar e controlar o processo produtivo durante a produção."},
+      {title:"Garantia da Qualidade", text:"Envolve toda a cadeia produtiva, com foco em prevenir problemas desde o projeto do produto."},
+      {title:"Gestão da Qualidade Total (TQM)", text:"Abordagem sistêmica que envolve toda a organização. Foco na satisfação do cliente e melhoria contínua."}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Mnemônico — ICGT", texto:"I=Inspeção | C=Controle Estatístico | G=Garantia | T=Gestão Total\n'Inspeciono, Controlo, Garanto e faço a Gestão Total'"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"1ª = detecta DEPOIS de pronto\n2ª = controla DURANTE a produção\n3ª = previne DESDE o projeto\n4ª = envolve TODA a organização"},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha", texto:"A prova pode misturar a ORDEM das eras.\nSempre começa na Inspeção (mais simples) e termina no TQM (mais completo)."}
+    ]
+  },
+  { id:3, title:"Motivação — Herzberg", icon:"💡", color:"#6b1a3a",
+    subtopics:[
+      {title:"Fatores Higiênicos (Q.4)", text:"• Salário\n• Segurança\n• Condições ambientais\n• Bem-estar físico\n• Supervisão\n• Aceitação grupal\n\nAusência gera insatisfação, mas presença NÃO garante motivação."},
+      {title:"Fatores Motivacionais (Q.5)", text:"• Ascensão funcional\n• Trabalho em si\n• Reconhecimento e responsabilidade\n• Liberdade e confiança\n• Desafios profissionais\n• Maior responsabilidade\n• Estímulo à criatividade\n\nPresença gera motivação e satisfação genuína."}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Higiênicos — SSCBSA", texto:"Salário, Segurança, Condições, Bem-estar, Supervisão, Aceitação\n'Só Se Cuida Bem Sendo Aceito'"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"Higiênico = vem de FORA (salário, chefe, ambiente)\nMotivacional = vem de DENTRO (crescimento, desafio, reconhecimento)"},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha — A mais cobrada!", texto:"'Salário elevado motiva o funcionário.' — ERRADO!\nSalário é fator HIGIÊNICO — evita insatisfação, NÃO gera motivação."}
+    ]
+  },
+  { id:4, title:"Processos e PDCA", icon:"⚙️", color:"#5a4a1a",
+    subtopics:[
+      {title:"O que é Processo? (Q.9)", text:"É um conjunto de causas ou fatores que agindo entre si, promovem a transformação da Matéria-prima ou lhe agregam valor, produzindo um resultado ou efeito desejado."},
+      {title:"Classificação dos Processos (Q.10)", text:"Os processos podem ser classificados como:\n• Repetitivos — ocorrem de forma padronizada e contínua\n• Não Repetitivos — ocorrem de forma única ou eventual"},
+      {title:"Fases do Ciclo PDCA (Q.11)", text:"P — Planejar: definir metas e métodos\nD — Executar (Do): treinar e executar\nC — Verificar (Check): comparar resultados com metas\nA — Agir (Act): corrigir desvios e padronizar melhorias"},
+      {title:"Indicadores de Desempenho (Q.12)", text:"São grandezas numéricas que medem atributos de um processo ou de seus resultados, com o objetivo de comparar essas medidas com metas numéricas preestabelecidas."}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 PDCA — PEVA", texto:"Planejar → Executar → Verificar → Agir\n'Preciso Executar com Vigor e Acerto'"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"P = planeja | D = executa | C = compara | A = corrige e padroniza"},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha A", texto:"'A' do PDCA NÃO é 'Avaliar'. É AGIR (Act)."},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha D", texto:"'D' NÃO é 'Desenvolver'. É DO = EXECUTAR."}
+    ]
+  },
+  { id:5, title:"Programa 5S", icon:"🇯🇵", color:"#1a5a6b",
+    subtopics:[
+      {title:"O que é o Programa 5S? (Q.13)", text:"É um programa de reeducação contra o desperdício."},
+      {title:"Os 5 Sensos Japoneses (Q.14)", text:"• SEIRI — Seleção, utilização, arrumação e organização\n• SEITON — Ordenação, sistematização e classificação\n• SEISOU — Limpeza e zelo\n• SEIKETSU — Bem-estar, higiene, asseio, saúde e integridade\n• SHITSUKE — Autodisciplina, educação e compromisso"},
+      {title:"Benefícios do 5S (Q.15)", text:"• Otimização dos espaços\n• Minimização de excessos\n• Consciência dos desperdícios\n• Melhor aproveitamento do tempo\n• Consciência da importância do controle"}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Ordem dos 5S", texto:"Selecionei → Organizei → Limpei → Cuido da saúde → Mantenho a disciplina"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"5S = REEDUCAÇÃO contra o DESPERDÍCIO — origem japonesa"},
+      {tipo:"peg",   titulo:"⚠️ SEISOU vs SHITSUKE", texto:"SEISOU = Limpeza e Zelo (3º)\nSHITSUKE = Autodisciplina (5º)\nProvas trocam os dois!"}
+    ]
+  },
+  { id:6, title:"Comunicação e Equipes", icon:"🗣️", color:"#4a1a6b",
+    subtopics:[
+      {title:"O que é Comunicação? (Q.18)", text:"É a transmissão de qualquer tipo de informação, por qualquer via ou processo."},
+      {title:"O que é Mensagem? (Q.19)", text:"É o conteúdo ou assunto das informações que são transmitidas."},
+      {title:"Canal de Comunicação (Q.20)", text:"É o meio pelo qual a mensagem é transmitida."},
+      {title:"Brainstorming (Q.16)", text:"É uma dinâmica de grupo em que as pessoas, de forma organizada e com oportunidades iguais, fazem um grande esforço mental para opinar sobre determinado assunto."},
+      {title:"Equipe (Q.17)", text:"Grupo de pessoas que trabalham juntos com sinergia, com competência e habilidades que se complementam para atingir um objetivo comum."}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Canal vs Mensagem", texto:"Canal = CAMINHO (meio)\nMensagem = PACOTE (conteúdo)\n'O canal carrega a mensagem'"},
+      {tipo:"peg",   titulo:"⚠️ Canal vs Mensagem", texto:"Canal = MEIO | Mensagem = CONTEÚDO\nProvas trocam os dois!"},
+      {tipo:"peg",   titulo:"⚠️ Equipe vs Grupo", texto:"Nem todo grupo é uma equipe!\nEquipe exige sinergia + habilidades complementares + objetivo comum."}
+    ]
+  },
+  { id:7, title:"Marinha do Brasil", icon:"⚓", color:"#1a2d6b",
+    subtopics:[
+      {title:"Programa Netuno (Q.21)", text:"É um processo administrativo destinado a aprimorar a gestão das Organizações Militares e, consequentemente, proporcionar à Marinha do Brasil as melhores condições para estar pronta e adequada à estatura político-estratégica exigida pelo país."},
+      {title:"7 Órgãos de Direção Setorial (Q.22)", text:"1. ComOpNav — Comando de Operações Navais\n2. SGM — Secretaria Geral da Marinha\n3. DGMM — Diretoria Geral do Material da Marinha\n4. DGPM — Diretoria Geral do Pessoal da Marinha\n5. DGN — Diretoria Geral de Navegação\n6. DGDNTM — Diretoria Geral de Desenvolvimento Nuclear e Tecnológico da Marinha\n7. CGCFN — Comando Geral do Corpo de Fuzileiros Navais"}
+    ],
+    mnemonicos:[
+      {tipo:"mnemo", titulo:"🧠 Mnemônico — 7 ODS", texto:"'Com Sargento, Dois Generais Navegam Com Coragem'\nC=ComOpNav · S=SGM · D=DGMM · G=DGPM · N=DGN · C=DGDNTM · C=CGCFN"},
+      {tipo:"dica",  titulo:"📝 Dica de Fixação", texto:"Netuno = processo ADMINISTRATIVO\nSão SETE (7) ODS — memorize!"},
+      {tipo:"peg",   titulo:"⚠️ Pegadinha — ODS", texto:"MB tem SETE (7) ODS. Provas colocam 5, 6 ou 8. Sempre 7!"}
+    ]
+  }
+];
+
+const PDF_TEXTO = `QUESTIONÁRIO DE GESTÃO 2026
+
+1. Quais são os principais componentes de um processo de qualidade na visão de JURAN?
+R: Planejamento da qualidade, controle da qualidade e aperfeiçoamento da qualidade.
+
+2. Quais são as eras da qualidade?
+R: Era da inspeção, era do controle estatístico da qualidade, era da garantia da qualidade e era da gestão da qualidade total.
+
+3. Explique a Era da Inspeção.
+R: Apoia-se em um sistema de medidas, utilizando-se de gabaritos e outros acessórios e de um padrão de referência.
+
+4. Cite os fatores higiênicos segundo HERZBERG.
+R: Salário, segurança, condições ambientais, bem-estar físico, supervisão e aceitação grupal.
+
+5. Cite os fatores motivacionais segundo HERZBERG.
+R: Ascensão funcional, trabalho em si, reconhecimento e responsabilidade, liberdade e confiança, desafios profissionais, maior responsabilidade e estímulo a criatividade.
+
+6. Qual a definição oficial de Qualidade?
+R: A Qualidade é o conjunto das propriedades e características de um produto, processo ou serviço, que lhe fornecem a capacidade de satisfazer as necessidades explícitas ou implícitas.
+
+7. O que é qualidade total?
+R: É o processo utilizado para garantir o atendimento às necessidades e expectativas dos clientes.
+
+8. O que é custo da qualidade?
+R: É a expressão usada para indicar dinheiro gasto para prevenir, avaliar e corrigir problemas, desperdícios e falhas de serviços e produtos.
+
+9. O que é processo?
+R: É um conjunto de causas ou fatores que agindo entre si, promovem a transformação da Matéria-prima ou lhe agregam valor, produzindo um resultado ou efeito desejado.
+
+10. Como os processos podem ser classificados?
+R: Os processos podem ser classificados como repetitivos e não repetitivos.
+
+11. Quais são as fases básicas do ciclo PDCA?
+R: Planejar, executar, verificar e agir.
+
+12. O que são indicadores de desempenho?
+R: São grandezas numéricas que medem atributos de um processo ou de seus resultados, com o objetivo de comparar essas medidas com metas numéricas preestabelecidas.
+
+13. O que é o programa 5S?
+R: É um programa de reeducação contra o desperdício.
+
+14. O termo 5S é derivado de cinco palavras em japonês, todas iniciadas com a letra S. Cite cada uma delas e suas atribuições.
+R: SEIRI- Seleção, utilização, arrumação e organização;
+   SEITON- Ordenação, sistematização e classificação;
+   SEISOU- Limpeza e zelo;
+   SEIKETSU- Bem-estar, higiene, asseio, saúde e integridade;
+   SHITSUKE- Autodisciplina, educação e compromisso.
+
+15. Cite os benefícios do programa 5S.
+R: Otimização dos espaços, minimização de excessos, consciência dos desperdícios, melhor aproveitamento do tempo e consciência da importância do controle.
+
+16. O que é Brainstorming?
+R: É uma dinâmica de grupo em que as pessoas, de forma organizada e com oportunidades iguais, fazem um grande esforço mental para opinar sobre determinado assunto.
+
+17. O que é equipe?
+R: Grupo de pessoas que trabalham juntos com sinergia, com competência e habilidades que se complementam para atingir um objetivo comum.
+
+18. O que é comunicação?
+R: É a transmissão de qualquer tipo de informação, por qualquer via ou processo.
+
+19. O que é mensagem?
+R: É o conteúdo ou assunto das informações que são transmitidas.
+
+20. O que é canal de comunicação?
+R: É o meio pelo qual a mensagem é transmitida.
+
+21. O que é o programa Netuno?
+R: É um processo administrativo destinado a aprimorar a gestão das Organizações Militares e, consequentemente, proporcionar à Marinha do Brasil as melhores condições para estar pronta e adequada à estatura político estratégica exigida pelo país.
+
+22. A Marinha do Brasil possui em sua estrutura sete órgãos de Direção Setorial. Cite-os.
+R: Comando de Operações Navais (ComOpNav), Secretaria Geral da Marinha (SGM), Diretoria Geral do Material da Marinha (DGMM), Diretoria Geral do Pessoal da Marinha (DGPM), Diretoria Geral de Navegação (DGN), Diretoria Geral de Desenvolvimento Nuclear e Tecnológico da Marinha (DGDNTM) e o Comando Geral do Corpo de Fuzileiros Navais (CGCFN).`;
+
+const Q_PADRAO = [
+  {num:1,q:"Quais são os principais componentes de um processo de qualidade na visão de JURAN?",ans:"Planejamento da qualidade, controle da qualidade e aperfeiçoamento da qualidade.",dica:"Lembre: PCA — Planejamento, Controle, Aperfeiçoamento."},
+  {num:2,q:"Quais são as eras da qualidade?",ans:"Era da inspeção, era do controle estatístico da qualidade, era da garantia da qualidade e era da gestão da qualidade total.",dica:"Lembre: ICGT — Inspeção → Controle → Garantia → Total."},
+  {num:3,q:"Explique a Era da Inspeção.",ans:"Apoia-se em um sistema de medidas, utilizando-se de gabaritos e outros acessórios e de um padrão de referência.",dica:"Lembre: gabaritos + padrão de referência = Era da Inspeção."},
+  {num:4,q:"Cite os fatores higiênicos segundo HERZBERG.",ans:"Salário, segurança, condições ambientais, bem-estar físico, supervisão e aceitação grupal.",dica:"Lembre: SSCBSA — Salário, Segurança, Condições, Bem-estar, Supervisão, Aceitação."},
+  {num:5,q:"Cite os fatores motivacionais segundo HERZBERG.",ans:"Ascensão funcional, trabalho em si, reconhecimento e responsabilidade, liberdade e confiança, desafios profissionais, maior responsabilidade e estímulo à criatividade.",dica:"Lembre: fatores internos — crescimento, desafio, reconhecimento, liberdade, criatividade."},
+  {num:6,q:"Qual a definição oficial de Qualidade?",ans:"A Qualidade é o conjunto das propriedades e características de um produto, processo ou serviço, que lhe fornecem a capacidade de satisfazer as necessidades explícitas ou implícitas.",dica:"Lembre: propriedades + características → satisfazer necessidades explícitas ou implícitas."},
+  {num:7,q:"O que é qualidade total?",ans:"É o processo utilizado para garantir o atendimento às necessidades e expectativas dos clientes.",dica:"Lembre: garantir o atendimento às necessidades e expectativas dos clientes."},
+  {num:8,q:"O que é custo da qualidade?",ans:"É a expressão usada para indicar dinheiro gasto para prevenir, avaliar e corrigir problemas, desperdícios e falhas de serviços e produtos.",dica:"Lembre: dinheiro para PREVENIR + AVALIAR + CORRIGIR falhas."},
+  {num:9,q:"O que é processo?",ans:"É um conjunto de causas ou fatores que agindo entre si, promovem a transformação da Matéria-prima ou lhe agregam valor, produzindo um resultado ou efeito desejado.",dica:"Lembre: causas/fatores que transformam a matéria-prima ou agregam valor."},
+  {num:10,q:"Como os processos podem ser classificados?",ans:"Os processos podem ser classificados como repetitivos e não repetitivos.",dica:"Lembre: dois tipos — Repetitivos e Não Repetitivos."},
+  {num:11,q:"Quais são as fases básicas do ciclo PDCA?",ans:"Planejar, executar, verificar e agir.",dica:"Lembre: PEVA. 'A' = AGIR, não Avaliar!"},
+  {num:12,q:"O que são indicadores de desempenho?",ans:"São grandezas numéricas que medem atributos de um processo ou de seus resultados, com o objetivo de comparar essas medidas com metas numéricas preestabelecidas.",dica:"Lembre: grandezas numéricas que comparam medidas com metas preestabelecidas."},
+  {num:13,q:"O que é o programa 5S?",ans:"É um programa de reeducação contra o desperdício.",dica:"Lembre: REEDUCAÇÃO contra o DESPERDÍCIO — origem japonesa."},
+  {num:14,q:"O termo 5S é derivado de cinco palavras em japonês. Cite cada uma e suas atribuições.",ans:"SEIRI- Seleção, utilização, arrumação e organização;\nSEITON- Ordenação, sistematização e classificação;\nSEISOu- Limpeza e zelo;\nSEIKETSU- Bem-estar, higiene, asseio, saúde e integridade;\nSHITSUKE- Autodisciplina, educação e compromisso.",dica:"Lembre: Selecionei → Organizei → Limpei → Cuidei → Mantive a disciplina."},
+  {num:15,q:"Cite os benefícios do programa 5S.",ans:"Otimização dos espaços, minimização de excessos, consciência dos desperdícios, melhor aproveitamento do tempo e consciência da importância do controle.",dica:"Lembre: espaço, excessos, desperdícios, tempo, controle."},
+  {num:16,q:"O que é Brainstorming?",ans:"É uma dinâmica de grupo em que as pessoas, de forma organizada e com oportunidades iguais, fazem um grande esforço mental para opinar sobre determinado assunto.",dica:"Lembre: dinâmica de grupo + organizada + oportunidades iguais + esforço mental."},
+  {num:17,q:"O que é equipe?",ans:"Grupo de pessoas que trabalham juntos com sinergia, com competência e habilidades que se complementam para atingir um objetivo comum.",dica:"Lembre: sinergia + habilidades complementares + objetivo comum."},
+  {num:18,q:"O que é comunicação?",ans:"É a transmissão de qualquer tipo de informação, por qualquer via ou processo.",dica:"Lembre: transmissão de QUALQUER informação, por QUALQUER via."},
+  {num:19,q:"O que é mensagem?",ans:"É o conteúdo ou assunto das informações que são transmitidas.",dica:"Lembre: mensagem = CONTEÚDO. Canal = MEIO."},
+  {num:20,q:"O que é canal de comunicação?",ans:"É o meio pelo qual a mensagem é transmitida.",dica:"Lembre: canal = MEIO. Não confunda com mensagem (conteúdo)!"},
+  {num:21,q:"O que é o programa Netuno?",ans:"É um processo administrativo destinado a aprimorar a gestão das Organizações Militares e proporcionar à MB as melhores condições para estar pronta e adequada à estatura político estratégica exigida pelo país.",dica:"Lembre: processo ADMINISTRATIVO + aprimorar GESTÃO das OM + MB pronta."},
+  {num:22,q:"A Marinha do Brasil possui em sua estrutura sete órgãos de Direção Setorial. Cite-os.",ans:"ComOpNav, SGM, DGMM, DGPM, DGN, DGDNTM e CGCFN.",dica:"Lembre: 'Com Sargento, Dois Generais Navegam Com Coragem' — sempre 7!"}
+];
+
+// ─── MÚLTIPLA ESCOLHA — alternativas EXPLÍCITAS e ÚNICAS por questão ──────────
+const MULTI_DATA = [
+  { pergunta: "Segundo Juran, quais são os 3 componentes do processo de qualidade?",
+    alternativas: ["Inspeção, Controle e Garantia da Qualidade","Planejamento, Controle e Aperfeiçoamento da Qualidade","Planejar, Executar, Verificar e Agir","Seleção, Ordenação, Limpeza e Disciplina"],
+    correta: 1,
+    explicacao: "Trilogia de Juran: Planejamento, Controle e Aperfeiçoamento da qualidade." },
+
+  { pergunta: "Qual era da qualidade apoia-se em gabaritos e padrões de referência?",
+    alternativas: ["Era da Gestão da Qualidade Total","Era da Garantia da Qualidade","Era do Controle Estatístico","Era da Inspeção"],
+    correta: 3,
+    explicacao: "Era da Inspeção usa gabaritos e padrões de referência para detectar defeitos após a produção." },
+
+  { pergunta: "O salário, segundo Herzberg, é classificado como:",
+    alternativas: ["Fator Motivacional que gera satisfação genuína","Fator Estratégico que aumenta produtividade","Fator Higiênico que evita insatisfação","Fator Operacional que melhora desempenho"],
+    correta: 2,
+    explicacao: "Salário é fator HIGIÊNICO. Evita insatisfação, mas NÃO garante motivação." },
+
+  { pergunta: "O que significa a letra 'A' no ciclo PDCA?",
+    alternativas: ["Avaliar os resultados obtidos no período","Agir corrigindo desvios e padronizando melhorias","Atualizar os indicadores de desempenho","Aprovar o planejamento que foi definido"],
+    correta: 1,
+    explicacao: "A = Act = AGIR: corrigir desvios e padronizar. NÃO é Avaliar!" },
+
+  { pergunta: "O que significa SEISOU no programa 5S?",
+    alternativas: ["Autodisciplina, educação e compromisso","Bem-estar, higiene, asseio e saúde","Ordenação, sistematização e classificação","Limpeza e zelo"],
+    correta: 3,
+    explicacao: "SEISOU = Limpeza e Zelo — 3º senso do 5S." },
+
+  { pergunta: "O Programa Netuno da MB tem por objetivo:",
+    alternativas: ["Treinar fuzileiros navais em combate e defesa","Aprimorar a gestão das Organizações Militares","Desenvolver tecnologia nuclear para a MB","Controlar gastos com armamento e munição naval"],
+    correta: 1,
+    explicacao: "Netuno é processo ADMINISTRATIVO de melhoria da gestão das OM." },
+
+  { pergunta: "Quantos Órgãos de Direção Setorial possui a MB?",
+    alternativas: ["Cinco (5) órgãos setoriais","Seis (6) órgãos setoriais","Sete (7) órgãos setoriais","Oito (8) órgãos setoriais"],
+    correta: 2,
+    explicacao: "A MB possui SETE (7) ODS: ComOpNav, SGM, DGMM, DGPM, DGN, DGDNTM e CGCFN." },
+
+  { pergunta: "O que é Brainstorming?",
+    alternativas: ["Técnica estatística de controle de processos industriais","Método de inspeção de produtos com gabaritos","Indicador numérico de desempenho de equipes","Dinâmica de grupo para geração organizada de ideias"],
+    correta: 3,
+    explicacao: "Brainstorming é dinâmica de grupo em que pessoas opinam de forma organizada." },
+
+  { pergunta: "Como os processos podem ser classificados?",
+    alternativas: ["Simples e complexos, conforme a dificuldade","Repetitivos e não repetitivos","Internos e externos, conforme a origem","Operacionais e estratégicos, conforme o nível"],
+    correta: 1,
+    explicacao: "Processos: Repetitivos (padronizados) e Não Repetitivos (únicos/eventuais)." },
+
+  { pergunta: "O que é Canal de Comunicação?",
+    alternativas: ["O conteúdo ou assunto da mensagem transmitida","O emissor que inicia e envia a mensagem","O meio pelo qual a mensagem é transmitida","O receptor que recebe e decodifica a informação"],
+    correta: 2,
+    explicacao: "Canal de Comunicação = o MEIO pelo qual a mensagem é transmitida." },
+
+  { pergunta: "A Qualidade Total tem como foco principal:",
+    alternativas: ["Reduzir ao máximo todos os custos de produção","Satisfazer as necessidades e expectativas dos clientes","Aumentar a velocidade dos processos produtivos","Eliminar completamente a necessidade de inspeção"],
+    correta: 1,
+    explicacao: "Qualidade Total: processo que garante atendimento às necessidades e expectativas dos clientes." },
+
+  { pergunta: "SEITON representa qual senso no programa 5S?",
+    alternativas: ["Limpeza e zelo — terceiro senso","Autodisciplina e compromisso — quinto senso","Seleção, utilização e arrumação — primeiro senso","Ordenação, sistematização e classificação — segundo senso"],
+    correta: 3,
+    explicacao: "SEITON = Ordenação, sistematização e classificação — 2º senso." },
+
+  { pergunta: "Qual a ordem correta das Eras da Qualidade?",
+    alternativas: ["Garantia → Inspeção → TQM → Controle Estatístico","Inspeção → Controle Estatístico → Garantia → TQM","TQM → Garantia → Controle Estatístico → Inspeção","Controle Estatístico → Inspeção → TQM → Garantia"],
+    correta: 1,
+    explicacao: "Ordem correta: Inspeção → Controle Estatístico → Garantia da Qualidade → TQM." },
+
+  { pergunta: "O Programa 5S é definido como:",
+    alternativas: ["Programa de treinamento intensivo de pessoal","Programa de controle estatístico da produção","Programa de reeducação contra o desperdício","Programa de inspeção final de produtos acabados"],
+    correta: 2,
+    explicacao: "5S é programa de REEDUCAÇÃO contra o desperdício, originado no Japão." },
+
+  { pergunta: "O que define uma equipe segundo o questionário?",
+    alternativas: ["Qualquer grupo de pessoas reunidas no mesmo local","Grupo de pessoas com o mesmo cargo e função","Pessoas com sinergia, habilidades complementares e objetivo comum","Grupo chefiado por um líder formalmente designado"],
+    correta: 2,
+    explicacao: "Equipe: sinergia + habilidades complementares + objetivo comum." }
+];
+
+const TF_DATA = [
+  {q:"Os fatores motivacionais de Herzberg incluem salário e segurança.",answer:false,just:"ERRADA. Salário e segurança são HIGIÊNICOS. Motivacionais: ascensão, reconhecimento, desafios, responsabilidade, criatividade."},
+  {q:"A Era da Inspeção apoia-se em gabaritos e padrões de referência.",answer:true,just:"CORRETA. Definição exata da Era da Inspeção."},
+  {q:"O programa 5S é um programa de reeducação contra o desperdício.",answer:true,just:"CORRETA. Definição exata do Programa 5S."},
+  {q:"SHITSUKE representa Limpeza e Zelo no programa 5S.",answer:false,just:"ERRADA. SHITSUKE = Autodisciplina. Limpeza e Zelo = SEISOU (3º senso)."},
+  {q:"O canal de comunicação é o conteúdo das informações transmitidas.",answer:false,just:"ERRADA. Canal = MEIO de transmissão. Conteúdo = MENSAGEM."},
+  {q:"As fases do PDCA são: Planejar, Executar, Verificar e Agir.",answer:true,just:"CORRETA. Fases exatas do ciclo PDCA."},
+  {q:"Qualidade Total garante atendimento às necessidades e expectativas dos clientes.",answer:true,just:"CORRETA. Definição exata de Qualidade Total."},
+  {q:"O CGCFN é a sigla para Comando Geral do Corpo de Fuzileiros Navais.",answer:true,just:"CORRETA. CGCFN é um dos 7 ODS da MB."},
+  {q:"Equipe é qualquer grupo de pessoas que trabalha no mesmo local.",answer:false,just:"ERRADA. Equipe exige SINERGIA, habilidades COMPLEMENTARES e objetivo COMUM."},
+  {q:"O Programa Netuno é um processo administrativo para aprimorar a gestão das OM.",answer:true,just:"CORRETA. Definição exata do Programa Netuno."},
+  {q:"A Era da Garantia da Qualidade utiliza gabaritos para detectar defeitos.",answer:false,just:"ERRADA. Gabaritos são da Era da INSPEÇÃO. A Garantia envolve toda a cadeia produtiva."},
+  {q:"Brainstorming é uma dinâmica em que as pessoas têm oportunidades iguais de opinar.",answer:true,just:"CORRETA. Oportunidades iguais é característica essencial do Brainstorming."},
+  {q:"Fatores higiênicos, quando presentes, garantem a motivação dos colaboradores.",answer:false,just:"ERRADA. Fatores higiênicos evitam insatisfação, mas NÃO garantem motivação."},
+  {q:"Indicadores de desempenho comparam grandezas numéricas com metas preestabelecidas.",answer:true,just:"CORRETA. Definição exata de Indicadores de Desempenho."},
+  {q:"A MB possui seis Órgãos de Direção Setorial.",answer:false,just:"ERRADA. A MB possui SETE (7) Órgãos de Direção Setorial."}
+];
+
+const COMPLETE_DATA = [
+  {q:"O Programa 5S é um programa de ______ contra o ______.",ans:"reeducação / desperdício",dica:"Lembre: REEDUCAÇÃO contra o DESPERDÍCIO."},
+  {q:"Os processos podem ser classificados como ______ e ______.",ans:"repetitivos / não repetitivos",dica:"Lembre: dois tipos — Repetitivos e Não Repetitivos."},
+  {q:"As fases do PDCA são: ______, ______, ______ e ______.",ans:"Planejar, Executar, Verificar e Agir",dica:"Lembre: PEVA. 'A' = AGIR, nunca Avaliar!"},
+  {q:"SEIRI: seleção, utilização, arrumação e ______.",ans:"organização",dica:"Lembre: SEIRI = Seleção + utilização + arrumação + organização."},
+  {q:"SEIKETSU: Bem-estar, higiene, ______, saúde e ______.",ans:"asseio / integridade",dica:"Lembre: SEIKETSU = bem-estar + higiene + asseio + saúde + integridade."},
+  {q:"O Programa Netuno é um processo ______ destinado a ______ a gestão das OM.",ans:"administrativo / aprimorar",dica:"Lembre: processo ADMINISTRATIVO para APRIMORAR a gestão."},
+  {q:"A MB possui em sua estrutura ______ órgãos de Direção Setorial.",ans:"sete (7)",dica:"Lembre: sempre SETE — não 5, não 6, não 8!"},
+  {q:"Canal de comunicação é o ______ pelo qual a ______ é transmitida.",ans:"meio / mensagem",dica:"Lembre: canal = MEIO. Mensagem = CONTEÚDO."},
+  {q:"Qualidade é o conjunto das ______ e características que satisfazem necessidades ______ ou implícitas.",ans:"propriedades / explícitas",dica:"Lembre: propriedades + características → necessidades explícitas ou implícitas."},
+  {q:"Equipe: grupo que trabalha com ______, com habilidades que se ______ para um objetivo comum.",ans:"sinergia / complementam",dica:"Lembre: SINERGIA + habilidades COMPLEMENTARES + objetivo COMUM."},
+  {q:"Indicadores de desempenho são ______ numéricas que medem ______ de um processo.",ans:"grandezas / atributos",dica:"Lembre: grandezas numéricas que medem atributos e comparam com metas."},
+  {q:"SHITSUKE: ______, educação e ______.",ans:"Autodisciplina / compromisso",dica:"Lembre: SHITSUKE = Autodisciplina + educação + compromisso (5º e último S)."}
+];
+
+const DEF_DATA = [
+  {term:"Qualidade (definição oficial)",ans:"A Qualidade é o conjunto das propriedades e características de um produto, processo ou serviço, que lhe fornecem a capacidade de satisfazer as necessidades explícitas ou implícitas.",dica:"Lembre: propriedades + características → satisfazer necessidades explícitas ou implícitas."},
+  {term:"Custo da Qualidade",ans:"É a expressão usada para indicar dinheiro gasto para prevenir, avaliar e corrigir problemas, desperdícios e falhas.",dica:"Lembre: dinheiro para PREVENIR + AVALIAR + CORRIGIR falhas."},
+  {term:"Processo",ans:"É um conjunto de causas ou fatores que agindo entre si, promovem a transformação da Matéria-prima ou lhe agregam valor, produzindo um resultado ou efeito desejado.",dica:"Lembre: causas/fatores → transformam matéria-prima → resultado desejado."},
+  {term:"Indicadores de Desempenho",ans:"São grandezas numéricas que medem atributos de um processo ou de seus resultados, com o objetivo de comparar essas medidas com metas numéricas preestabelecidas.",dica:"Lembre: grandezas numéricas → medem atributos → comparam com metas."},
+  {term:"Programa Netuno",ans:"É um processo administrativo destinado a aprimorar a gestão das Organizações Militares e proporcionar à MB as melhores condições para estar pronta e adequada à estatura político-estratégica exigida pelo país.",dica:"Lembre: processo ADM + aprimorar gestão das OM + MB pronta."},
+  {term:"Equipe",ans:"Grupo de pessoas que trabalham juntos com sinergia, com competência e habilidades que se complementam para atingir um objetivo comum.",dica:"Lembre: sinergia + habilidades complementares + objetivo comum."},
+  {term:"Canal de Comunicação",ans:"É o meio pelo qual a mensagem é transmitida.",dica:"Lembre: canal = MEIO. Mensagem = CONTEÚDO."},
+  {term:"Qualidade Total",ans:"É o processo utilizado para garantir o atendimento às necessidades e expectativas dos clientes.",dica:"Lembre: garantir atendimento às necessidades e expectativas dos clientes."},
+  {term:"Brainstorming",ans:"É uma dinâmica de grupo em que as pessoas, de forma organizada e com oportunidades iguais, fazem um grande esforço mental para opinar sobre determinado assunto.",dica:"Lembre: dinâmica organizada + oportunidades iguais + esforço mental."},
+  {term:"Mensagem",ans:"É o conteúdo ou assunto das informações que são transmitidas.",dica:"Lembre: mensagem = CONTEÚDO (o quê). Canal = MEIO (o como)."},
+  {term:"Programa 5S",ans:"É um programa de reeducação contra o desperdício.",dica:"Lembre: REEDUCAÇÃO contra DESPERDÍCIO — origem japonesa."},
+  {term:"Comunicação",ans:"É a transmissão de qualquer tipo de informação, por qualquer via ou processo.",dica:"Lembre: transmissão de QUALQUER informação, por QUALQUER via."}
+];
+
+const CORR_BASE = [
+  { titulo: "5S — Sensos e Significados (Q.14)",
+    pares: [
+      {e:"SEIRI",     d:"Seleção, utilização, arrumação e organização"},
+      {e:"SEITON",    d:"Ordenação, sistematização e classificação"},
+      {e:"SEISOU",    d:"Limpeza e zelo"},
+      {e:"SEIKETSU",  d:"Bem-estar, higiene, asseio, saúde e integridade"},
+      {e:"SHITSUKE",  d:"Autodisciplina, educação e compromisso"}
+    ]
+  },
+  { titulo: "PDCA — Fases e Ações (Q.11)",
+    pares: [
+      {e:"P — Plan",  d:"Definir metas e métodos"},
+      {e:"D — Do",    d:"Treinar e executar o plano"},
+      {e:"C — Check", d:"Comparar resultados com metas"},
+      {e:"A — Act",   d:"Corrigir desvios e padronizar"}
+    ]
+  },
+  { titulo: "Eras da Qualidade (Q.2/Q.3)",
+    pares: [
+      {e:"1ª Era — Inspeção",      d:"Gabaritos e padrões de referência"},
+      {e:"2ª Era — Controle Est.", d:"Técnicas estatísticas durante produção"},
+      {e:"3ª Era — Garantia",      d:"Envolve toda a cadeia produtiva"},
+      {e:"4ª Era — TQM",           d:"Toda a organização, foco no cliente"}
+    ]
+  },
+  { titulo: "Herzberg — Fatores (Q.4/Q.5)",
+    pares: [
+      {e:"Salário",             d:"Fator Higiênico"},
+      {e:"Reconhecimento",      d:"Fator Motivacional"},
+      {e:"Segurança",           d:"Fator Higiênico"},
+      {e:"Ascensão funcional",  d:"Fator Motivacional"},
+      {e:"Aceitação grupal",    d:"Fator Higiênico"}
+    ]
+  },
+  { titulo: "MB — Siglas e Nomes (Q.22)",
+    pares: [
+      {e:"ComOpNav", d:"Comando de Operações Navais"},
+      {e:"SGM",      d:"Secretaria Geral da Marinha"},
+      {e:"DGMM",     d:"Diretoria Geral do Material da Marinha"},
+      {e:"CGCFN",    d:"Comando Geral do Corpo de Fuzileiros Navais"},
+      {e:"DGN",      d:"Diretoria Geral de Navegação"}
+    ]
+  }
+];
+
+function embaralhar(n) {
+  const arr = Array.from({length: n}, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+const CORR_SHUFFLES = CORR_BASE.map(s => embaralhar(s.pares.length));
+
+const CITE_DATA = [
+  {q:"Cite os 4 componentes/fases do Ciclo PDCA. (Q.11)",ans:["Planejar","Executar","Verificar","Agir"],dica:"Lembre: PEVA. 'A' = AGIR, não Avaliar!"},
+  {q:"Cite as 4 Eras da Qualidade em ordem cronológica. (Q.2)",ans:["Era da Inspeção","Era do Controle Estatístico da Qualidade","Era da Garantia da Qualidade","Era da Gestão da Qualidade Total"],dica:"Lembre: ICGT — Inspeção → Controle → Garantia → Total."},
+  {q:"Cite os fatores higiênicos segundo Herzberg. (Q.4)",ans:["Salário","Segurança","Condições ambientais","Bem-estar físico","Supervisão","Aceitação grupal"],dica:"Lembre: SSCBSA — 6 fatores externos."},
+  {q:"Cite os fatores motivacionais segundo Herzberg. (Q.5)",ans:["Ascensão funcional","Trabalho em si","Reconhecimento e responsabilidade","Liberdade e confiança","Desafios profissionais","Maior responsabilidade","Estímulo à criatividade"],dica:"Lembre: 7 fatores internos."},
+  {q:"Cite os 7 Órgãos de Direção Setorial da MB. (Q.22)",ans:["ComOpNav","SGM","DGMM","DGPM","DGN","DGDNTM","CGCFN"],dica:"Lembre: 'Com Sargento, Dois Generais Navegam Com Coragem'"},
+  {q:"Cite os 5 benefícios do Programa 5S. (Q.15)",ans:["Otimização dos espaços","Minimização de excessos","Consciência dos desperdícios","Melhor aproveitamento do tempo","Consciência da importância do controle"],dica:"Lembre: espaço, excessos, desperdícios, tempo, controle."},
+  {q:"Cite os 3 componentes da Trilogia de Juran. (Q.1)",ans:["Planejamento da qualidade","Controle da qualidade","Aperfeiçoamento da qualidade"],dica:"Lembre: PCA."},
+  {q:"Cite os 5 sensos do 5S com suas atribuições. (Q.14)",ans:["SEIRI — Seleção, utilização, arrumação e organização","SEITON — Ordenação, sistematização e classificação","SEISOU — Limpeza e zelo","SEIKETSU — Bem-estar, higiene, asseio, saúde e integridade","SHITSUKE — Autodisciplina, educação e compromisso"],dica:"Lembre: Selecionei → Organizei → Limpei → Cuidei → Disciplinei."}
+];
+
+const FLASHCARDS_DATA = [
+  {f:"O que é Qualidade?",v:"Conjunto das propriedades e características de um produto, processo ou serviço que satisfazem necessidades explícitas ou implícitas."},
+  {f:"O que é Qualidade Total?",v:"Processo utilizado para garantir o atendimento às necessidades e expectativas dos clientes."},
+  {f:"O que é Custo da Qualidade?",v:"Dinheiro gasto para PREVENIR, AVALIAR e CORRIGIR problemas, desperdícios e falhas."},
+  {f:"Quais são os 3 componentes da Trilogia de Juran?",v:"1. Planejamento da qualidade\n2. Controle da qualidade\n3. Aperfeiçoamento da qualidade"},
+  {f:"Cite as 4 Eras da Qualidade em ordem.",v:"1ª Inspeção → 2ª Controle Estatístico → 3ª Garantia → 4ª Gestão da Qualidade Total"},
+  {f:"O que caracteriza a Era da Inspeção?",v:"Usa gabaritos e padrões de referência para detectar defeitos APÓS a produção."},
+  {f:"O que são Fatores Higiênicos (Herzberg)?",v:"Salário, Segurança, Condições, Bem-estar, Supervisão, Aceitação grupal.\nEvitam insatisfação, mas NÃO garantem motivação."},
+  {f:"O que são Fatores Motivacionais (Herzberg)?",v:"Ascensão funcional, Trabalho em si, Reconhecimento, Liberdade, Desafios, Responsabilidade, Criatividade.\nGeram satisfação genuína."},
+  {f:"O que é Processo?",v:"Conjunto de causas ou fatores que promovem a transformação da Matéria-prima ou lhe agregam valor, produzindo um resultado desejado."},
+  {f:"Como os processos se classificam?",v:"Repetitivos (padronizados) e Não Repetitivos (únicos ou eventuais)."},
+  {f:"Quais são as fases do ciclo PDCA?",v:"P — Planejar\nD — Executar\nC — Verificar\nA — Agir"},
+  {f:"O que são Indicadores de Desempenho?",v:"Grandezas numéricas que medem atributos de um processo para comparar com metas preestabelecidas."},
+  {f:"O que é o Programa 5S?",v:"Programa de reeducação contra o desperdício, originado no Japão."},
+  {f:"O que significa SEIRI?",v:"Seleção, utilização, arrumação e organização. (1º senso)"},
+  {f:"O que significa SEITON?",v:"Ordenação, sistematização e classificação. (2º senso)"},
+  {f:"O que significa SEISOU?",v:"Limpeza e zelo. (3º senso)"},
+  {f:"O que significa SEIKETSU?",v:"Bem-estar, higiene, asseio, saúde e integridade. (4º senso)"},
+  {f:"O que significa SHITSUKE?",v:"Autodisciplina, educação e compromisso. (5º senso)"},
+  {f:"Cite os 5 benefícios do Programa 5S.",v:"1. Otimização dos espaços\n2. Minimização de excessos\n3. Consciência dos desperdícios\n4. Melhor aproveitamento do tempo\n5. Consciência da importância do controle"},
+  {f:"O que é Brainstorming?",v:"Dinâmica de grupo em que as pessoas, de forma organizada e com oportunidades iguais, fazem um grande esforço mental para opinar."},
+  {f:"O que é Equipe?",v:"Grupo com sinergia, habilidades complementares, para atingir um objetivo comum."},
+  {f:"O que é Comunicação?",v:"Transmissão de qualquer tipo de informação, por qualquer via ou processo."},
+  {f:"O que é Mensagem?",v:"O conteúdo ou assunto das informações que são transmitidas."},
+  {f:"O que é Canal de Comunicação?",v:"O meio pelo qual a mensagem é transmitida."},
+  {f:"O que é o Programa Netuno?",v:"Processo administrativo para aprimorar a gestão das OM e proporcionar à MB melhores condições para estar pronta à estatura político-estratégica."},
+  {f:"Quantos ODS possui a MB? Cite-os.",v:"SETE (7):\nComOpNav, SGM, DGMM, DGPM, DGN, DGDNTM, CGCFN"},
+  {f:"⚠️ PEGADINHA: Salário motiva o funcionário?",v:"ERRADO! Salário é fator HIGIÊNICO — evita insatisfação, mas NÃO gera motivação verdadeira."},
+  {f:"⚠️ PEGADINHA: 'A' do PDCA = Avaliar?",v:"ERRADO! 'A' = AGIR (Act). A comparação acontece no 'C' (Check = Verificar)."},
+  {f:"⚠️ PEGADINHA: SEISOU = Autodisciplina?",v:"ERRADO! SEISOU = Limpeza e Zelo (3º).\nAutodisciplina = SHITSUKE (5º)."},
+  {f:"⚠️ PEGADINHA: 5S é programa de treinamento?",v:"ERRADO! 5S é programa de REEDUCAÇÃO contra o desperdício."}
+];
+
+const RESUMO_SUPER = [
+  "🏆 Qualidade = satisfazer necessidades explícitas e implícitas (Q.6)",
+  "📐 Trilogia Juran = Planejamento + Controle + Aperfeiçoamento (Q.1)",
+  "📜 4 Eras = Inspeção → Controle Estatístico → Garantia → TQM (Q.2)",
+  "💡 Higiênicos (salário/segurança) = EVITAM insatisfação APENAS (Q.4)",
+  "💡 Motivacionais (reconhecimento/desafios) = GERAM satisfação real (Q.5)",
+  "⚙️ PDCA = Planejar → Executar → Verificar → Agir (Q.11)",
+  "🇯🇵 5S = REEDUCAÇÃO contra DESPERDÍCIO — japonesa (Q.13)",
+  "🇯🇵 SEIRI=Seleção | SEITON=Ordenação | SEISOU=Limpeza | SEIKETSU=Bem-estar | SHITSUKE=Disciplina",
+  "⚓ MB tem SETE (7) ODS (Q.22)",
+  "⚓ Netuno = processo ADMINISTRATIVO para aprimorar gestão das OM (Q.21)",
+  "🗣️ Canal = MEIO | Mensagem = CONTEÚDO (Q.19/Q.20)",
+  "⚠️ A = AGIR (não Avaliar) | D = EXECUTAR (não Desenvolver)"
+];
+
+const RESUMO_COMPLETO = [
+  {titulo:"QUALIDADE",cor:"#1a6b4a",itens:["Def. Oficial: propriedades/características que satisfazem necessidades explícitas ou implícitas","Qualidade Total: garante atendimento às necessidades e expectativas dos clientes","Custo: gastos para PREVENIR, AVALIAR e CORRIGIR falhas","Trilogia Juran: Planejamento + Controle + Aperfeiçoamento","⚠️ Aperfeiçoamento ≠ Melhoria Contínua (Kaizen)"]},
+  {titulo:"ERAS DA QUALIDADE",cor:"#1a3d6b",itens:["1ª Inspeção: gabaritos — detecta APÓS produção","2ª Controle Estatístico: técnicas DURANTE produção","3ª Garantia: envolve TODA a cadeia produtiva","4ª TQM: TODA a organização, foco no cliente","⚠️ Ordem: I → C → G → T (nunca inverter!)"]},
+  {titulo:"HERZBERG",cor:"#6b1a3a",itens:["Higiênicos: salário, segurança, condições, bem-estar, supervisão, aceitação grupal","Motivacionais: ascensão, trabalho em si, reconhecimento, liberdade, desafios, responsabilidade, criatividade","⚠️ Salário NÃO motiva — só evita insatisfação!","Higiênico = externo | Motivacional = intrínseco"]},
+  {titulo:"PROCESSOS E PDCA",cor:"#5a4a1a",itens:["Processo: causas/fatores que transformam matéria-prima","Repetitivos (padronizados) e Não Repetitivos (únicos)","P=Planejar | D=Executar | C=Verificar | A=Agir","Indicadores: grandezas numéricas para medir e comparar com metas","⚠️ A = AGIR | D = EXECUTAR"]},
+  {titulo:"PROGRAMA 5S",cor:"#1a5a6b",itens:["5S = reeducação contra o DESPERDÍCIO (não treinamento!)","SEIRI=Seleção | SEITON=Ordenação | SEISOU=Limpeza","SEIKETSU=Bem-estar, higiene, asseio, saúde e integridade","SHITSUKE=Autodisciplina, educação e compromisso","⚠️ SEISOU(3º) ≠ SHITSUKE(5º): Limpeza ≠ Disciplina"]},
+  {titulo:"COMUNICAÇÃO E EQUIPES",cor:"#4a1a6b",itens:["Comunicação: transmissão de qualquer informação","Mensagem = CONTEÚDO (o quê)","Canal = MEIO de transmissão (o como)","Brainstorming: organizado + oportunidades iguais + esforço mental","Equipe: sinergia + habilidades complementares + objetivo comum","⚠️ Canal ≠ Mensagem | Grupo ≠ Equipe"]},
+  {titulo:"MARINHA DO BRASIL",cor:"#1a2d6b",itens:["Netuno: processo ADM para aprimorar gestão das OM","7 ODS: ComOpNav, SGM, DGMM, DGPM, DGN, DGDNTM, CGCFN","⚠️ São 7 ODS — não 5, não 6, não 8!"]}
+];
+
+const MAPA_DADOS = [
+  {label:"QUALIDADE",icon:"🏆",cor:"#1a6b4a",desc:"Q.1,Q.6,Q.7,Q.8",nos:[{l:"Def. Oficial",d:"Propriedades/características que satisfazem necessidades"},{l:"Qualidade Total",d:"Garante atendimento às expectativas dos clientes"},{l:"Custo da Qualidade",d:"Gastos para prevenir, avaliar e corrigir"},{l:"Trilogia Juran",d:"PCA: Planejamento → Controle → Aperfeiçoamento"},{l:"⚠️ Pegadinha",d:"Aperfeiçoamento ≠ Melhoria Contínua"}]},
+  {label:"ERAS (4)",icon:"📜",cor:"#1a3d6b",desc:"Q.2,Q.3",nos:[{l:"1ª Inspeção",d:"Gabaritos — detecta APÓS produção"},{l:"2ª Controle Est.",d:"Estatística DURANTE a produção"},{l:"3ª Garantia",d:"Toda cadeia produtiva, desde o projeto"},{l:"4ª TQM",d:"Toda organização, foco no cliente"},{l:"⚠️ Ordem",d:"I → C → G → T. Provas invertem!"}]},
+  {label:"HERZBERG",icon:"💡",cor:"#6b1a3a",desc:"Q.4,Q.5",nos:[{l:"Higiênicos",d:"Salário, segurança, condições, bem-estar, supervisão, aceitação"},{l:"Motivacionais",d:"Ascensão, reconhecimento, desafios, liberdade, criatividade"},{l:"⚠️ Pegadinha",d:"Salário NÃO motiva! Higiênico presente NÃO garante motivação."}]},
+  {label:"PDCA",icon:"⚙️",cor:"#5a4a1a",desc:"Q.9-Q.12",nos:[{l:"P-Planejar",d:"Definir metas e métodos"},{l:"D-Executar",d:"Treinar e colocar em prática"},{l:"C-Verificar",d:"Comparar resultados com metas"},{l:"A-Agir",d:"Corrigir desvios e padronizar"},{l:"⚠️ Pegadinha",d:"A=AGIR / D=EXECUTAR (não Avaliar/Desenvolver)"}]},
+  {label:"5S",icon:"🇯🇵",cor:"#1a5a6b",desc:"Q.13-Q.15",nos:[{l:"SEIRI (1º)",d:"Seleção, utilização, arrumação e organização"},{l:"SEITON (2º)",d:"Ordenação, sistematização e classificação"},{l:"SEISOU (3º)",d:"Limpeza e zelo"},{l:"SEIKETSU (4º)",d:"Bem-estar, higiene, asseio, saúde e integridade"},{l:"SHITSUKE (5º)",d:"Autodisciplina, educação e compromisso"},{l:"⚠️ Pegadinha",d:"SEISOU(3º Limpeza) ≠ SHITSUKE(5º Disciplina)"}]},
+  {label:"COMUNICAÇÃO",icon:"🗣️",cor:"#4a1a6b",desc:"Q.16-Q.20",nos:[{l:"Comunicação",d:"Transmissão de qualquer informação"},{l:"Mensagem",d:"O CONTEÚDO (o quê)"},{l:"Canal",d:"O MEIO de transmissão (o como)"},{l:"Brainstorming",d:"Dinâmica organizada, oportunidades iguais"},{l:"Equipe",d:"Sinergia + complementares + objetivo comum"},{l:"⚠️ Pegadinha",d:"Canal≠Mensagem | Grupo≠Equipe"}]},
+  {label:"MARINHA",icon:"⚓",cor:"#1a2d6b",desc:"Q.21,Q.22",nos:[{l:"Prog. Netuno",d:"Processo ADM para aprimorar gestão das OM"},{l:"7 ODS",d:"ComOpNav·SGM·DGMM·DGPM·DGN·DGDNTM·CGCFN"},{l:"⚠️ São 7 ODS",d:"Não 5, não 6, não 8!"},{l:"⚠️ Netuno",d:"Processo ADMINISTRATIVO de gestão"}]}
+];
+
+// ─── ESTILOS CONSTANTES ───────────────────────────────────────────────────────
+const sCard  = {background:COR.card, border:`1px solid ${COR.brd}`, borderRadius:"10px", padding:"18px", marginBottom:"12px"};
+const sQTxt  = {fontSize:"14px", color:"#e8f4f8", lineHeight:"1.6", marginBottom:"14px", fontWeight:"500"};
+const sInp   = {width:"100%", background:"#0d1a2e", border:`1px solid ${COR.brd}`, borderRadius:"6px", padding:"10px", color:"#e8f4f8", fontSize:"13px", marginBottom:"8px", fontFamily:"Georgia,serif", minHeight:"90px", resize:"vertical"};
+const sBtnP  = {background:COR.accent, color:"#000", border:"none", padding:"9px 22px", borderRadius:"6px", cursor:"pointer", fontWeight:"bold", fontSize:"12px", marginTop:"10px"};
+const sBtnS  = {background:"transparent", border:`1px solid ${COR.brd}`, color:"#7fb3c8", padding:"7px 14px", borderRadius:"6px", cursor:"pointer", fontSize:"11px", marginRight:"6px"};
+const sBtnR  = {background:"transparent", border:`1px solid ${COR.orange}`, color:COR.orange, padding:"7px 14px", borderRadius:"6px", cursor:"pointer", fontSize:"11px", marginRight:"6px"};
+const sAnsB  = {background:`${COR.green}12`, border:`1px solid ${COR.green}`, borderRadius:"6px", padding:"10px", fontSize:"12px", color:COR.green, lineHeight:"1.7"};
+
+// ─── COMPONENTES AUXILIARES ────────────────────────────────────────────────────
+function Wrap({children}) {
+  return <div style={{maxWidth:"860px",margin:"0 auto",padding:"16px 12px"}}>{children}</div>;
+}
+
+function ProgBar({cur, tot, lbl, onRestart}) {
+  return (
+    <div style={{background:"#0d1a2e",borderRadius:"6px",padding:"7px 12px",marginBottom:"10px",fontSize:"11px",color:"#7fb3c8",display:"flex",justifyContent:"space-between",alignItems:"center",border:`1px solid ${COR.brd}`}}>
+      <span>📝 {lbl}</span>
+      <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+        <span style={{color:COR.accent,fontWeight:"bold",fontSize:"14px"}}>{cur + 1} / {tot}</span>
+        <button onClick={onRestart} style={{background:"transparent",border:`1px solid ${COR.brd}`,color:"#7fb3c8",padding:"2px 8px",borderRadius:"4px",cursor:"pointer",fontSize:"10px"}}>↺ Recomeçar</button>
+      </div>
+    </div>
+  );
+}
+
+function DicaBox({dica}) {
+  return (
+    <div style={{background:`${COR.orange}10`,border:`1px solid ${COR.orange}50`,borderRadius:"6px",padding:"10px 12px",fontSize:"12px",color:"#ffd090",lineHeight:"1.6",marginTop:"8px"}}>
+      <div style={{fontSize:"11px",fontWeight:"bold",color:COR.orange,marginBottom:"4px"}}>💡 Caso não saiba a resposta completa, lembre disso:</div>
+      {dica}
+    </div>
+  );
+}
+
+function ScoreBox({score, total, erradas, onReset, onErradas, semNota}) {
+  return (
+    <Wrap>
+      <div style={{textAlign:"center",background:COR.card,border:`2px solid ${COR.gold}`,borderRadius:"12px",padding:"28px"}}>
+        {semNota ? (
+          <div style={{fontSize:"20px",color:COR.gold,marginBottom:"8px"}}>✅ Exercício Concluído!</div>
+        ) : (
+          <>
+            <div style={{fontSize:"14px",color:"#7fb3c8",marginBottom:"5px"}}>Resultado Final</div>
+            <div style={{fontSize:"52px",color:COR.gold,fontWeight:"bold"}}>{score}<span style={{fontSize:"24px",color:"#7fb3c8"}}>/{total}</span></div>
+            <div style={{fontSize:"13px",color:score/total>=0.7?COR.green:COR.red,marginTop:"5px"}}>
+              {score/total>=0.9?"🏆 Excelente!":score/total>=0.7?"✅ Muito bom!":score/total>=0.5?"⚠️ Pode melhorar":"📚 Estude mais!"}
+            </div>
+          </>
+        )}
+        <div style={{display:"flex",gap:"7px",justifyContent:"center",marginTop:"16px",flexWrap:"wrap"}}>
+          <button style={sBtnS} onClick={onReset}>↺ Refazer tudo</button>
+          {onErradas && erradas && erradas.length > 0 && (
+            <button style={sBtnR} onClick={onErradas}>🔁 Só as erradas ({erradas.length})</button>
+          )}
+        </div>
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── FLASHCARDS ───────────────────────────────────────────────────────────────
+function Flashcards() {
+  const [poolIdx, setPoolIdx] = useState(() => FLASHCARDS_DATA.map((_, i) => i));
+  const [pos, setPos]         = useState(0);
+  const [virado, setVirado]   = useState(false);
+  const [acertos, setAcertos] = useState(0);
+  const [erradosIdx, setErrados] = useState([]);
+  const [done, setDone]       = useState(false);
+
+  const tot = poolIdx.length;
+
+  const reiniciar = () => {
+    setPoolIdx(FLASHCARDS_DATA.map((_, i) => i));
+    setPos(0); setVirado(false); setAcertos(0); setErrados([]); setDone(false);
+  };
+
+  const refazerErrados = () => {
+    if (erradosIdx.length === 0) return;
+    setPoolIdx([...erradosIdx]);
+    setPos(0); setVirado(false); setAcertos(0); setErrados([]); setDone(false);
+  };
+
+  const responder = (soube) => {
+    const novoErrado = soube ? erradosIdx : [...erradosIdx, poolIdx[pos]];
+    if (!soube) setErrados(novoErrado);
+    else setAcertos(a => a + 1);
+    if (pos + 1 >= tot) {
+      setErrados(novoErrado);
+      setDone(true);
+    } else {
+      setPos(p => p + 1);
+      setVirado(false);
+    }
+  };
+
+  if (done) return (
+    <Wrap>
+      <div style={{textAlign:"center",background:COR.card,border:`2px solid ${COR.gold}`,borderRadius:"12px",padding:"28px"}}>
+        <div style={{fontSize:"20px",color:COR.gold,marginBottom:"12px"}}>🃏 Flashcards Concluídos!</div>
+        <div style={{fontSize:"15px",color:COR.green,marginBottom:"4px"}}>✅ Soube: {acertos}</div>
+        <div style={{fontSize:"15px",color:COR.red,marginBottom:"16px"}}>❌ Não soube: {erradosIdx.length}</div>
+        <div style={{display:"flex",gap:"8px",justifyContent:"center",flexWrap:"wrap"}}>
+          <button style={sBtnS} onClick={reiniciar}>↺ Refazer todos</button>
+          {erradosIdx.length > 0 && (
+            <button style={sBtnR} onClick={refazerErrados}>🔁 Só os que não soube ({erradosIdx.length})</button>
+          )}
+        </div>
+      </div>
+    </Wrap>
+  );
+
+  const card = FLASHCARDS_DATA[poolIdx[pos]];
+
+  return (
+    <Wrap>
+      <div style={{background:"#0d1a2e",borderRadius:"6px",padding:"7px 12px",marginBottom:"10px",border:`1px solid ${COR.brd}`,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:"11px",color:"#7fb3c8"}}>
+        <span>🃏 Flashcards</span>
+        <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
+          <span style={{color:COR.green}}>✅ {acertos}</span>
+          <span style={{color:COR.red}}>❌ {erradosIdx.length}</span>
+          <span style={{color:COR.accent,fontWeight:"bold",fontSize:"14px"}}>{pos + 1} / {tot}</span>
+          <button onClick={reiniciar} style={{background:"transparent",border:`1px solid ${COR.brd}`,color:"#7fb3c8",padding:"2px 8px",borderRadius:"4px",cursor:"pointer",fontSize:"10px"}}>↺</button>
+        </div>
+      </div>
+
+      <div style={{background:"#0d1a2e",borderRadius:"6px",height:"6px",overflow:"hidden",border:`1px solid ${COR.brd}`,marginBottom:"14px"}}>
+        <div style={{background:COR.accent,height:"100%",width:`${((pos+1)/tot)*100}%`,transition:"width .3s"}}/>
+      </div>
+
+      <div onClick={() => setVirado(v => !v)} style={{
+        background:virado?`${COR.green}15`:COR.card,
+        border:`2px solid ${virado?COR.green:COR.accent}`,
+        borderRadius:"12px",padding:"28px 20px",minHeight:"160px",
+        cursor:"pointer",display:"flex",flexDirection:"column",
+        alignItems:"center",justifyContent:"center",textAlign:"center",
+        marginBottom:"14px",transition:"all .2s"
+      }}>
+        <div style={{fontSize:"10px",color:virado?COR.green:COR.accent,marginBottom:"10px",letterSpacing:"1px",fontWeight:"bold"}}>
+          {virado ? "✅ RESPOSTA — toque para voltar" : "❓ PERGUNTA — toque para revelar"}
+        </div>
+        <div style={{fontSize:"14px",color:"#e8f4f8",lineHeight:"1.7",whiteSpace:"pre-line"}}>
+          {virado ? card.v : card.f}
+        </div>
+      </div>
+
+      {!virado && <div style={{textAlign:"center",color:"#7fb3c8",fontSize:"12px",marginBottom:"12px"}}>👆 Toque no cartão para ver a resposta</div>}
+
+      {virado && (
+        <div style={{display:"flex",gap:"10px",justifyContent:"center",marginBottom:"12px"}}>
+          <button onClick={() => responder(false)} style={{padding:"12px 28px",borderRadius:"8px",border:`2px solid ${COR.red}`,background:`${COR.red}20`,color:COR.red,cursor:"pointer",fontWeight:"bold",fontSize:"13px"}}>
+            ❌ Não sabia
+          </button>
+          <button onClick={() => responder(true)} style={{padding:"12px 28px",borderRadius:"8px",border:`2px solid ${COR.green}`,background:`${COR.green}20`,color:COR.green,cursor:"pointer",fontWeight:"bold",fontSize:"13px"}}>
+            ✅ Sabia!
+          </button>
+        </div>
+      )}
+    </Wrap>
+  );
+}
+
+// ─── QUESTÕES PADRÃO ─────────────────────────────────────────────────────────
+function QPadrao() {
+  const [idx, setIdx]     = useState(0);
+  const [input, setInput] = useState("");
+  const [show, setShow]   = useState(false);
+  const [done, setDone]   = useState(false);
+
+  const q = Q_PADRAO[idx];
+
+  const reiniciar = () => { setIdx(0); setInput(""); setShow(false); setDone(false); };
+
+  if (done) return (
+    <Wrap>
+      <div style={{textAlign:"center",background:COR.card,border:`2px solid ${COR.gold}`,borderRadius:"12px",padding:"28px"}}>
+        <div style={{fontSize:"20px",color:COR.gold,marginBottom:"8px"}}>🎓 Questionário Completo!</div>
+        <button style={sBtnS} onClick={reiniciar}>↺ Recomeçar</button>
+      </div>
+    </Wrap>
+  );
+
+  return (
+    <Wrap>
+      <ProgBar cur={idx} tot={Q_PADRAO.length} lbl="Questões Padrão" onRestart={reiniciar}/>
+      <div style={{background:`${COR.gold}15`,border:`1px solid ${COR.gold}40`,borderRadius:"8px",padding:"10px 14px",marginBottom:"12px",display:"flex",justifyContent:"space-between"}}>
+        <div style={{fontSize:"11px",color:COR.gold,fontWeight:"bold"}}>📄 QUESTIONÁRIO OFICIAL — Gestão 2026</div>
+        <span style={{color:COR.gold,fontWeight:"bold"}}>{idx+1}/{Q_PADRAO.length}</span>
+      </div>
+      <div style={sCard}>
+        <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+          <span style={{background:`${COR.gold}30`,color:COR.gold,borderRadius:"50%",width:"28px",height:"28px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:"bold",fontSize:"13px",flexShrink:0}}>{q.num}</span>
+        </div>
+        <div style={sQTxt}>{q.q}</div>
+        {!show && (
+          <>
+            <textarea style={sInp} placeholder="Escreva sua resposta aqui..." value={input} onChange={e => setInput(e.target.value)}/>
+            <button style={sBtnP} onClick={() => { if (input.trim()) setShow(true); }}>OK — Ver Gabarito</button>
+          </>
+        )}
+        {show && (
+          <>
+            <div style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderRadius:"6px",padding:"10px",marginBottom:"8px",fontSize:"12px",color:"#c8dce8",lineHeight:"1.6"}}>
+              <div style={{fontSize:"11px",color:"#7fb3c8",fontWeight:"bold",marginBottom:"4px"}}>📝 Sua resposta:</div>{input}
+            </div>
+            <DicaBox dica={q.dica}/>
+            <div style={{...sAnsB,marginTop:"8px"}}>
+              <div style={{fontSize:"11px",fontWeight:"bold",marginBottom:"4px"}}>📋 Gabarito:</div>
+              {q.ans}
+            </div>
+            <button style={sBtnP} onClick={() => {
+              if (idx + 1 >= Q_PADRAO.length) setDone(true);
+              else { setIdx(i => i + 1); setInput(""); setShow(false); }
+            }}>
+              {idx + 1 < Q_PADRAO.length ? "Próxima Questão →" : "Finalizar"}
+            </button>
+          </>
+        )}
+      </div>
+      <div style={{display:"flex",gap:"5px",flexWrap:"wrap",marginTop:"8px"}}>
+        {Q_PADRAO.map((_, i) => (
+          <button key={i} onClick={() => { if (!show) { setIdx(i); setInput(""); setShow(false); } }}
+            style={{width:"28px",height:"28px",borderRadius:"50%",border:`1px solid ${i===idx?COR.gold:COR.brd}`,background:i===idx?`${COR.gold}30`:"#0d1a2e",color:i===idx?COR.gold:"#7fb3c8",cursor:"pointer",fontSize:"10px",fontWeight:i===idx?"bold":"normal"}}>
+            {i+1}
+          </button>
+        ))}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── MÚLTIPLA ESCOLHA ─────────────────────────────────────────────────────────
+// ABORDAGEM FINAL: estado fora do React (variável de módulo).
+// Isso torna IMPOSSÍVEL qualquer reset por remount, StrictMode, batching ou
+// reconciliação do React — o estado existe no módulo JS, não na árvore React.
+
+let _mq = null; // estado global do quiz, fora do React
+
+function _mqReset(pool) {
+  _mq = {
+    pool:    pool ? pool.slice() : MULTI_DATA.slice(),
+    pos:     0,
+    sel:     null,   // índice selecionado
+    conf:    false,  // confirmado
+    acertos: 0,
+    erradas: [],
+    fim:     false
+  };
+}
+
+function MultiplaEscolha() {
+  // tick serve APENAS para forçar re-render — o estado real está em _mq
+  const [tick, setTick] = useState(0);
+  const re = () => setTick(t => t + 1);
+
+  // Inicializa na primeira vez (ou se _mq foi zerado)
+  if (!_mq) _mqReset();
+  const st = _mq;
+
+  if (st.fim) {
+    const erradasPool = st.erradas.map(i => st.pool[i]);
+    const acertos     = st.acertos;
+    const total       = st.pool.length;
+    const erradas     = st.erradas.slice();
+    return (
+      <ScoreBox
+        score={acertos}
+        total={total}
+        erradas={erradas}
+        onReset={() => { _mqReset(); re(); }}
+        onErradas={erradas.length > 0
+          ? () => { _mqReset(erradasPool); re(); }
+          : null}
+      />
+    );
+  }
+
+  const q   = st.pool[st.pos];
+  const tot = st.pool.length;
+
+  // Ações — mutam _mq e forçam re-render
+  const selecionar = (i) => {
+    if (st.conf) return;
+    st.sel = i;
+    re();
+  };
+
+  const confirmar = () => {
+    if (st.sel === null || st.conf) return;
+    st.conf = true;
+    if (st.sel === q.correta) st.acertos += 1;
+    else st.erradas = [...st.erradas, st.pos];
+    re();
+  };
+
+  const proxima = () => {
+    if (st.pos + 1 >= tot) st.fim = true;
+    else {
+      st.pos  += 1;
+      st.sel   = null;
+      st.conf  = false;
+    }
+    re();
+  };
+
+  // Estilos dos botões — calculados antes do JSX
+  const estilo = (i) => {
+    if (st.conf) {
+      if (i === q.correta) return { bg:`${COR.green}20`, brd:COR.green,  col:COR.green  };
+      if (i === st.sel)    return { bg:`${COR.red}20`,   brd:COR.red,    col:COR.red    };
+    }
+    if (st.sel === i)      return { bg:`${COR.accent}15`,brd:COR.accent, col:COR.accent };
+    return { bg:"#0d1a2e", brd:COR.brd, col:"#c8dce8" };
+  };
+
+  const s0=estilo(0), s1=estilo(1), s2=estilo(2), s3=estilo(3);
+
+  const corFb  = st.conf && st.sel === q.correta ? COR.green : COR.red;
+  const txtFb  = st.conf
+    ? (st.sel === q.correta ? "✅ Correto! " : "❌ Errado! ") + q.explicacao
+    : "\u00A0";
+
+  const btnStyle = (s) => ({
+    display:"block", width:"100%", textAlign:"left",
+    padding:"10px 12px", margin:"5px 0", borderRadius:"6px",
+    border:`1px solid ${s.brd}`, background:s.bg, color:s.col,
+    cursor: st.conf ? "default":"pointer", fontSize:"12px"
+  });
+
+  return (
+    <Wrap>
+      <ProgBar cur={st.pos} tot={tot} lbl="Múltipla Escolha"
+        onRestart={() => { _mqReset(); re(); }}/>
+      <div style={sCard}>
+        <div style={{background:`${COR.gold}15`,border:`1px solid ${COR.gold}30`,
+          borderRadius:"6px",padding:"5px 12px",marginBottom:"10px",
+          fontSize:"11px",color:COR.gold}}>
+          Questão {st.pos+1} de {tot}
+        </div>
+
+        <div style={sQTxt}>{q.pergunta}</div>
+
+        {/* 4 botões fixos — sem .map, sem key dinâmico, sem componente inline */}
+        <button style={btnStyle(s0)} onClick={() => selecionar(0)}>
+          <strong>A)</strong> {q.alternativas[0]}
+        </button>
+        <button style={btnStyle(s1)} onClick={() => selecionar(1)}>
+          <strong>B)</strong> {q.alternativas[1]}
+        </button>
+        <button style={btnStyle(s2)} onClick={() => selecionar(2)}>
+          <strong>C)</strong> {q.alternativas[2]}
+        </button>
+        <button style={btnStyle(s3)} onClick={() => selecionar(3)}>
+          <strong>D)</strong> {q.alternativas[3]}
+        </button>
+
+        <button onClick={confirmar} style={{...sBtnP, background:COR.gold, color:"#000",
+          display: st.sel !== null && !st.conf ? "inline-block" : "none"}}>
+          ✔ Confirmar Resposta
+        </button>
+
+        <div style={{display: st.conf ? "block":"none",
+          background:`${corFb}12`, border:`1px solid ${corFb}`,
+          borderRadius:"6px", padding:"10px", marginTop:"8px",
+          fontSize:"12px", color:corFb, lineHeight:"1.6"}}>
+          {txtFb}
+        </div>
+
+        <button onClick={proxima} style={{...sBtnP,
+          display: st.conf ? "inline-block":"none"}}>
+          {st.pos + 1 < tot ? "Próxima Questão →" : "Ver Resultado"}
+        </button>
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── CERTO OU ERRADO ─────────────────────────────────────────────────────────
+function CertoErrado() {
+  const [pool, setPool]       = useState(TF_DATA);
+  const [idx, setIdx]         = useState(0);
+  const [sel, setSel]         = useState(null);
+  const [show, setShow]       = useState(false);
+  const [score, setScore]     = useState(0);
+  const [erradas, setErradas] = useState([]);
+  const [done, setDone]       = useState(false);
+  const [just, setJust]       = useState("");
+  const [subjust, setSubjust] = useState("");
+
+  const reiniciar = (novoPool) => {
+    setPool(novoPool || TF_DATA);
+    setIdx(0); setSel(null); setShow(false);
+    setScore(0); setErradas([]); setDone(false);
+    setJust(""); setSubjust("");
+  };
+
+  if (done) return (
+    <ScoreBox score={score} total={pool.length} erradas={erradas}
+      onReset={() => reiniciar(TF_DATA)}
+      onErradas={erradas.length > 0 ? () => reiniciar(erradas.map(i => pool[i])) : null}/>
+  );
+
+  const q = pool[idx];
+
+  const estiloBotaoTF = (val) => {
+    let border = COR.brd, bg = "#0d1a2e", color = "#7fb3c8";
+    if (show) {
+      if (q.answer === val)  { border=COR.green; bg=`${COR.green}20`; color=COR.green; }
+      else if (sel === val)  { border=COR.red;   bg=`${COR.red}20`;   color=COR.red;   }
+    } else if (sel === val)  { border=COR.accent; bg=`${COR.accent}15`; color=COR.accent; }
+    return {padding:"12px 22px",borderRadius:"6px",border:`2px solid ${border}`,background:bg,color,cursor:"pointer",fontSize:"13px",fontWeight:"bold",margin:"0 5px"};
+  };
+
+  const confirmar = (val) => {
+    const ok = val === q.answer;
+    if (ok) setScore(s => s + 1);
+    else setErradas(e => [...e, idx]);
+    setSubjust(just); setJust(""); setShow(true);
+  };
+
+  const proxima = () => {
+    if (idx + 1 >= pool.length) setDone(true);
+    else { setIdx(i => i+1); setSel(null); setShow(false); setJust(""); setSubjust(""); }
+  };
+
+  return (
+    <Wrap>
+      <ProgBar cur={idx} tot={pool.length} lbl="Certo ou Errado" onRestart={() => reiniciar(TF_DATA)}/>
+      <div style={sCard}>
+        <div style={sQTxt}>{q.q}</div>
+        <div style={{display:"flex",gap:"8px",justifyContent:"center",margin:"12px 0"}}>
+          <button style={estiloBotaoTF(true)}  onClick={() => { if(show||sel!==null)return; setSel(true);  confirmar(true);  }}>✅ CERTO</button>
+          <button style={estiloBotaoTF(false)} onClick={() => { if(show||sel!==null)return; setSel(false); }}>❌ ERRADO</button>
+        </div>
+        {sel===false && !show && (
+          <div style={{marginTop:"8px",padding:"10px",background:`${COR.red}10`,border:`1px solid ${COR.red}40`,borderRadius:"6px"}}>
+            <div style={{fontSize:"12px",color:"#ffaaaa",marginBottom:"6px"}}>📝 Justifique por que a afirmação está errada:</div>
+            <textarea style={{...sInp,minHeight:"65px"}} placeholder="Escreva sua justificativa..." value={just} onChange={e => setJust(e.target.value)}/>
+            <button style={{...sBtnP,background:COR.red,color:"#fff"}} onClick={() => confirmar(false)}>OK — Confirmar e Ver Gabarito</button>
+          </div>
+        )}
+        {show && (
+          <div style={{background:sel===q.answer?`${COR.green}12`:`${COR.red}12`,border:`1px solid ${sel===q.answer?COR.green:COR.red}`,borderRadius:"6px",padding:"10px",marginTop:"8px",fontSize:"12px",color:sel===q.answer?COR.green:"#ffaaaa",lineHeight:"1.6"}}>
+            <strong>{q.just}</strong>
+            {sel===false && subjust && <div style={{marginTop:"6px",padding:"6px",background:"#ffffff0a",borderRadius:"4px",fontSize:"11px",color:"#bbb"}}>📝 Sua justificativa: "{subjust}"</div>}
+          </div>
+        )}
+        {show && <button style={sBtnP} onClick={proxima}>{idx+1<pool.length?"Próxima →":"Ver Resultado"}</button>}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── COMPLETE ────────────────────────────────────────────────────────────────
+function Complete() {
+  const [pool, setPool]   = useState(COMPLETE_DATA);
+  const [idx, setIdx]     = useState(0);
+  const [input, setInput] = useState("");
+  const [show, setShow]   = useState(false);
+  const [done, setDone]   = useState(false);
+
+  const reiniciar = (p) => { setPool(p||COMPLETE_DATA); setIdx(0); setInput(""); setShow(false); setDone(false); };
+  if (done) return <ScoreBox score={0} total={pool.length} erradas={[]} semNota onReset={() => reiniciar(COMPLETE_DATA)} onErradas={null}/>;
+  const q = pool[idx];
+  const proxima = () => { if(idx+1>=pool.length) setDone(true); else { setIdx(i=>i+1); setInput(""); setShow(false); } };
+
+  return (
+    <Wrap>
+      <ProgBar cur={idx} tot={pool.length} lbl="Complete" onRestart={() => reiniciar(COMPLETE_DATA)}/>
+      <div style={sCard}>
+        <div style={sQTxt}>{q.q}</div>
+        {!show && <><textarea style={sInp} placeholder="Digite sua resposta..." value={input} onChange={e=>setInput(e.target.value)}/><button style={sBtnP} onClick={()=>{if(input.trim())setShow(true);}}>OK — Ver Gabarito</button></>}
+        {show && <>
+          <div style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderRadius:"6px",padding:"10px",marginBottom:"8px",fontSize:"12px",color:"#c8dce8"}}><span style={{fontSize:"11px",color:"#7fb3c8",fontWeight:"bold"}}>📝 Sua resposta: </span>{input}</div>
+          <DicaBox dica={q.dica}/>
+          <div style={{...sAnsB,marginTop:"8px"}}><div style={{fontSize:"11px",fontWeight:"bold",marginBottom:"4px"}}>📋 Gabarito:</div>{q.ans}</div>
+          <button style={sBtnP} onClick={proxima}>{idx+1<pool.length?"Próxima →":"Finalizar"}</button>
+        </>}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── DEFINIÇÕES ──────────────────────────────────────────────────────────────
+function Definicoes() {
+  const [pool, setPool]   = useState(DEF_DATA);
+  const [idx, setIdx]     = useState(0);
+  const [input, setInput] = useState("");
+  const [show, setShow]   = useState(false);
+  const [done, setDone]   = useState(false);
+
+  const reiniciar = (p) => { setPool(p||DEF_DATA); setIdx(0); setInput(""); setShow(false); setDone(false); };
+  if (done) return <ScoreBox score={0} total={pool.length} erradas={[]} semNota onReset={() => reiniciar(DEF_DATA)} onErradas={null}/>;
+  const q = pool[idx];
+  const proxima = () => { if(idx+1>=pool.length) setDone(true); else { setIdx(i=>i+1); setInput(""); setShow(false); } };
+
+  return (
+    <Wrap>
+      <ProgBar cur={idx} tot={pool.length} lbl="Definições" onRestart={() => reiniciar(DEF_DATA)}/>
+      <div style={sCard}>
+        <div style={sQTxt}>Defina: <strong style={{color:COR.gold}}>{q.term}</strong></div>
+        {!show && <><textarea style={sInp} placeholder="Escreva a definição..." value={input} onChange={e=>setInput(e.target.value)}/><button style={sBtnP} onClick={()=>{if(input.trim())setShow(true);}}>OK — Ver Gabarito</button></>}
+        {show && <>
+          <div style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderRadius:"6px",padding:"10px",marginBottom:"8px",fontSize:"12px",color:"#c8dce8"}}><span style={{fontSize:"11px",color:"#7fb3c8",fontWeight:"bold"}}>📝 Sua resposta: </span>{input}</div>
+          <DicaBox dica={q.dica}/>
+          <div style={{...sAnsB,marginTop:"8px"}}><div style={{fontSize:"11px",fontWeight:"bold",marginBottom:"4px"}}>📋 Gabarito:</div>{q.ans}</div>
+          <button style={sBtnP} onClick={proxima}>{idx+1<pool.length?"Próxima →":"Finalizar"}</button>
+        </>}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── CITE / LISTE ────────────────────────────────────────────────────────────
+function Cite() {
+  const [pool, setPool]   = useState(CITE_DATA);
+  const [idx, setIdx]     = useState(0);
+  const [input, setInput] = useState("");
+  const [show, setShow]   = useState(false);
+  const [done, setDone]   = useState(false);
+
+  const reiniciar = (p) => { setPool(p||CITE_DATA); setIdx(0); setInput(""); setShow(false); setDone(false); };
+  if (done) return <ScoreBox score={0} total={pool.length} erradas={[]} semNota onReset={() => reiniciar(CITE_DATA)} onErradas={null}/>;
+  const q = pool[idx];
+  const proxima = () => { if(idx+1>=pool.length) setDone(true); else { setIdx(i=>i+1); setInput(""); setShow(false); } };
+
+  return (
+    <Wrap>
+      <ProgBar cur={idx} tot={pool.length} lbl="Cite / Liste" onRestart={() => reiniciar(CITE_DATA)}/>
+      <div style={sCard}>
+        <div style={sQTxt}>{q.q}</div>
+        {!show && <><textarea style={sInp} placeholder="Escreva sua resposta..." value={input} onChange={e=>setInput(e.target.value)}/><button style={sBtnP} onClick={()=>{if(input.trim())setShow(true);}}>OK — Ver Gabarito</button></>}
+        {show && <>
+          <div style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderRadius:"6px",padding:"10px",marginBottom:"8px",fontSize:"12px",color:"#c8dce8"}}><span style={{fontSize:"11px",color:"#7fb3c8",fontWeight:"bold"}}>📝 Sua resposta: </span>{input}</div>
+          <DicaBox dica={q.dica}/>
+          <div style={{...sAnsB,marginTop:"8px"}}><div style={{fontSize:"11px",fontWeight:"bold",marginBottom:"4px"}}>📋 Gabarito:</div><ul style={{margin:"4px 0 0 16px",padding:0}}>{q.ans.map((a,i)=><li key={i} style={{marginBottom:"3px"}}>{a}</li>)}</ul></div>
+          <button style={sBtnP} onClick={proxima}>{idx+1<pool.length?"Próxima →":"Finalizar"}</button>
+        </>}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── CORRELACIONE ─────────────────────────────────────────────────────────────
+// CORREÇÃO 2: gabarito sempre no DOM, visibilidade via display CSS (evita insertBefore)
+// ─── CORRELACIONE — reescrito do zero com dropdowns ──────────────────────────
+// A abordagem click-esquerda→click-direita causava removeChild/insertBefore
+// porque o React perdia o controle da árvore ao adicionar/remover nós condicionais.
+// Nova abordagem: cada termo tem um <select> — DOM completamente estável,
+// zero nós condicionais, zero problemas de reconciliação.
+function Correlacione() {
+  const [si, setSi]       = useState(0);
+  const [resp, setResp]   = useState({});  // { termIdx: posDir | "" }
+  const [verif, setVerif] = useState(false);
+  const [fim, setFim]     = useState(false);
+
+  const conjunto = CORR_BASE[si];
+  const pares    = conjunto.pares;
+  const n        = pares.length;
+  const shuf     = CORR_SHUFFLES[si];
+
+  const resetar   = () => { setResp({}); setVerif(false); };
+  const reiniciar = () => { setSi(0); resetar(); setFim(false); };
+
+  const responder = (termIdx, valor) => {
+    if (verif) return;
+    setResp(prev => ({ ...prev, [termIdx]: valor }));
+  };
+
+  const tudoRespondido = pares.every((_, i) =>
+    resp[i] !== undefined && resp[i] !== ""
+  );
+
+  // Verifica acerto: o dropdown do termo i escolheu a posDir P,
+  // e shuf[P] === i significa que a definição nessa posição pertence ao termo i.
+  const acertouTermo = (i) => {
+    const posDir = resp[i];
+    return posDir !== undefined && posDir !== "" && shuf[Number(posDir)] === i;
+  };
+
+  const placar = verif
+    ? pares.reduce((acc, _, i) => acc + (acertouTermo(i) ? 1 : 0), 0)
+    : 0;
+
+  const proximo = () => {
+    if (si + 1 >= CORR_BASE.length) setFim(true);
+    else { setSi(s => s + 1); resetar(); }
+  };
+
+  if (fim) return (
+    <Wrap>
+      <div style={{
+        textAlign:"center", background:COR.card,
+        border:`2px solid ${COR.gold}`, borderRadius:"12px", padding:"28px"
+      }}>
+        <div style={{fontSize:"18px",color:COR.gold,marginBottom:"8px"}}>
+          🎉 Todos os conjuntos concluídos!
+        </div>
+        <button style={sBtnS} onClick={reiniciar}>↺ Refazer tudo</button>
+      </div>
+    </Wrap>
+  );
+
+  return (
+    <Wrap>
+      {/* Cabeçalho */}
+      <div style={{
+        background:"#0d1a2e", borderRadius:"6px", padding:"7px 12px",
+        marginBottom:"10px", fontSize:"11px", color:"#7fb3c8",
+        display:"flex", justifyContent:"space-between", alignItems:"center",
+        border:`1px solid ${COR.brd}`
+      }}>
+        <span>🔗 {conjunto.titulo}</span>
+        <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+          <span style={{color:COR.accent, fontWeight:"bold", fontSize:"13px"}}>
+            {si + 1} / {CORR_BASE.length}
+          </span>
+          <button
+            onClick={reiniciar}
+            style={{
+              background:"transparent", border:`1px solid ${COR.brd}`,
+              color:"#7fb3c8", padding:"2px 8px",
+              borderRadius:"4px", cursor:"pointer", fontSize:"10px"
+            }}
+          >↺</button>
+        </div>
+      </div>
+
+      <div style={sCard}>
+        <div style={{fontSize:"11px", color:"#7fb3c8", marginBottom:"14px"}}>
+          Para cada termo, escolha a definição correta no menu suspenso.
+        </div>
+
+        {/* Uma linha por termo — sempre N linhas, DOM estável */}
+        {pares.map((par, i) => {
+          const ok  = verif && acertouTermo(i);
+          const err = verif && !acertouTermo(i) && resp[i] !== undefined && resp[i] !== "";
+
+          // Cores calculadas antes do JSX — sem ternários instáveis inline
+          const corBorda = ok ? COR.green : err ? COR.red : COR.brd;
+          const corFundo = ok ? `${COR.green}10` : err ? `${COR.red}10` : "#0d1a2e";
+          const corTexto = ok ? COR.green : err ? COR.red : "#c8dce8";
+          const badgeFundo = ok ? COR.green : err ? COR.red : "#1a2a3a";
+          const badgeCor   = ok ? "#000"    : err ? "#fff"  : COR.gold;
+
+          // Texto da correção — sempre uma string, nunca nulo
+          const textoCorrecao = err ? `✓ Correto: ${par.d}` : "\u00A0";
+
+          return (
+            <div
+              key={i}
+              style={{
+                marginBottom:"10px", padding:"10px",
+                borderRadius:"8px", border:`1px solid ${corBorda}`,
+                background: corFundo
+              }}
+            >
+              {/* Linha: badge + termo */}
+              <div style={{
+                display:"flex", alignItems:"center", gap:"8px",
+                marginBottom:"8px", fontSize:"12px",
+                fontWeight:"bold", color: corTexto
+              }}>
+                <span style={{
+                  display:"inline-flex", alignItems:"center", justifyContent:"center",
+                  minWidth:"22px", height:"20px",
+                  background: badgeFundo, color: badgeCor,
+                  borderRadius:"3px", padding:"0 5px",
+                  fontSize:"11px", fontWeight:"bold", flexShrink:0
+                }}>
+                  {i + 1}
+                </span>
+                <span>{par.e}</span>
+                {/* Ícone — span sempre presente, conteúdo muda */}
+                <span style={{marginLeft:"auto", fontSize:"14px"}}>
+                  {ok ? "✅" : err ? "❌" : ""}
+                </span>
+              </div>
+
+              {/* Dropdown de definições */}
+              <select
+                value={resp[i] !== undefined ? resp[i] : ""}
+                onChange={e => responder(i, e.target.value)}
+                disabled={verif}
+                style={{
+                  width:"100%", background:"#0a1628",
+                  border:`1px solid ${corBorda}`,
+                  borderRadius:"6px", padding:"8px 10px",
+                  color: corTexto, fontSize:"11px",
+                  cursor: verif ? "default" : "pointer",
+                  outline:"none"
+                }}
+              >
+                <option value="">— selecione a definição —</option>
+                {shuf.map((origIdx, posDir) => (
+                  <option key={posDir} value={posDir}>
+                    {pares[origIdx].d}
+                  </option>
+                ))}
+              </select>
+
+              {/* Correção — div SEMPRE presente, visibilidade via color/height */}
+              <div style={{
+                fontSize:"11px",
+                color: err ? "#ffaaaa" : "transparent",
+                marginTop: err ? "6px" : "0px",
+                height: err ? "auto" : "0px",
+                overflow:"hidden",
+                lineHeight:"1.5"
+              }}>
+                {textoCorrecao}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Botão verificar — SEMPRE no DOM */}
+        <button
+          onClick={() => setVerif(true)}
+          style={{
+            ...sBtnP,
+            display: tudoRespondido && !verif ? "inline-block" : "none"
+          }}
+        >
+          ✅ Verificar Respostas
+        </button>
+
+        {/* Resultado + próximo — SEMPRE no DOM */}
+        <div style={{ display: verif ? "block" : "none", marginTop:"12px" }}>
+          <div style={{
+            color: placar === n ? COR.green : "#ffaa00",
+            fontWeight:"bold", fontSize:"15px", marginBottom:"10px"
+          }}>
+            {placar === n ? "🏆 Perfeito!" : `Acertou ${placar} / ${n}`}
+          </div>
+          <button style={sBtnP} onClick={proximo}>
+            {si + 1 < CORR_BASE.length ? "Próximo Conjunto →" : "Finalizar"}
+          </button>
+        </div>
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── PDF ──────────────────────────────────────────────────────────────────────
+function PDFViewer({search, onSearch}) {
+  const linhas = PDF_TEXTO.split("\n");
+  const termo  = search.toLowerCase().trim();
+  return (
+    <Wrap>
+      <div style={{display:"flex",gap:"8px",alignItems:"center",marginBottom:"12px",flexWrap:"wrap"}}>
+        <input type="text" placeholder="🔍 Buscar no questionário..." value={search} onChange={e=>onSearch(e.target.value)}
+          style={{flex:1,minWidth:"200px",background:"#0d1a2e",border:`1px solid ${COR.accent}`,borderRadius:"6px",padding:"8px 12px",color:"#e8f4f8",fontSize:"13px",fontFamily:"Georgia,serif"}}/>
+        {search && <button style={{...sBtnS,color:COR.red,borderColor:COR.red}} onClick={()=>onSearch("")}>✕</button>}
+      </div>
+      {search && <div style={{fontSize:"11px",color:"#7fb3c8",marginBottom:"8px"}}>{linhas.filter(l=>l.toLowerCase().includes(termo)).length} resultado(s)</div>}
+      <div style={{background:COR.card,border:`1px solid ${COR.brd}`,borderRadius:"10px",padding:"20px",fontFamily:"Georgia,serif"}}>
+        {linhas.map((linha,i) => {
+          const match = termo && linha.toLowerCase().includes(termo);
+          if (search && !match) return null;
+          const isQ = /^\d+\./.test(linha.trim());
+          const isR = linha.trim().startsWith("R:");
+          const isTit = linha.trim() === "QUESTIONÁRIO DE GESTÃO 2026";
+          let partes = [];
+          if (match && termo) { const p=linha.toLowerCase().indexOf(termo); partes=[linha.slice(0,p),linha.slice(p,p+termo.length),linha.slice(p+termo.length)]; }
+          return (
+            <div key={i} style={{padding:isQ?"10px 0 2px 0":isR?"2px 0 10px 16px":"3px 0",fontSize:isTit?"15px":"13px",fontWeight:isQ||isTit?"bold":"normal",color:isTit?COR.gold:isQ?COR.accent:isR?"#c8dce8":"#a8c0cc",background:match?`${COR.gold}15`:"transparent",borderRadius:match?"4px":"0",paddingLeft:isR?"16px":"0",lineHeight:"1.7",borderBottom:isR?`1px solid ${COR.brd}30`:"none"}}>
+              {match && partes.length>0 ? <>{partes[0]}<mark style={{background:`${COR.gold}60`,color:"#000",borderRadius:"2px",padding:"0 2px"}}>{partes[1]}</mark>{partes[2]}</> : (linha||" ")}
+            </div>
+          );
+        })}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── MAPA MENTAL ─────────────────────────────────────────────────────────────
+function MapaMental({exp, setExp}) {
+  return (
+    <Wrap>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",marginBottom:"12px",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}}>🧠 Mapa Mental Interativo</div>
+      <div style={{textAlign:"center",marginBottom:"16px"}}>
+        <div style={{display:"inline-block",padding:"14px 24px",background:`linear-gradient(135deg,${COR.accent}25,${COR.gold}15)`,border:`2px solid ${COR.accent}`,borderRadius:"14px"}}>
+          <div style={{fontSize:"20px",marginBottom:"3px"}}>⚓</div>
+          <div style={{fontSize:"14px",fontWeight:"bold",color:COR.accent}}>GESTÃO & QUALIDADE</div>
+          <div style={{fontSize:"10px",color:"#7fb3c8"}}>Marinha do Brasil — 2026</div>
+        </div>
+        <div style={{fontSize:"10px",color:"#7fb3c8",marginTop:"6px"}}>Toque em qualquer ramo para expandir</div>
+      </div>
+      {MAPA_DADOS.map((ramo,i) => {
+        const aberto = exp===i;
+        return (
+          <div key={i} style={{marginBottom:"8px",borderRadius:"10px",overflow:"hidden",border:`2px solid ${aberto?ramo.cor:ramo.cor+"60"}`}}>
+            <div style={{background:`${ramo.cor}30`,padding:"12px 16px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}} onClick={()=>setExp(aberto?null:i)}>
+              <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                <span style={{fontSize:"20px"}}>{ramo.icon}</span>
+                <div>
+                  <div style={{fontSize:"14px",fontWeight:"bold",color:"#e8f4f8"}}>{ramo.label}</div>
+                  <div style={{fontSize:"10px",color:"#9fb3c8"}}>{ramo.desc}</div>
+                </div>
+              </div>
+              <span style={{fontSize:"16px",color:ramo.cor,fontWeight:"bold"}}>{aberto?"▲":"▼"}</span>
+            </div>
+            {aberto && (
+              <div style={{padding:"12px 14px",background:COR.card}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(195px,1fr))",gap:"8px"}}>
+                  {ramo.nos.map((no,j) => {
+                    const peg = no.l.includes("⚠️");
+                    return (
+                      <div key={j} style={{padding:"10px 12px",borderRadius:"8px",background:peg?"#1a0808":`${ramo.cor}15`,border:`1px solid ${peg?COR.red+"50":ramo.cor+"40"}`}}>
+                        <div style={{fontSize:"12px",fontWeight:"bold",color:peg?COR.red:ramo.cor,marginBottom:"4px"}}>{no.l}</div>
+                        <div style={{fontSize:"11px",color:"#b8ccd8",lineHeight:"1.5"}}>{no.d}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </Wrap>
+  );
+}
+
+// ─── RESUMO ───────────────────────────────────────────────────────────────────
+function Resumo({modo}) {
+  return (
+    <Wrap>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",margin:"12px 0",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}}>
+        {modo==="super" ? "⚡ Super Resumo" : "📋 Resumo Completo"}
+      </div>
+      {modo==="super" ? (
+        <div style={{background:COR.card,border:`1px solid ${COR.brd}`,borderRadius:"10px",padding:"16px"}}>
+          {RESUMO_SUPER.map((item,i) => (
+            <div key={i} style={{padding:"7px 12px",margin:"4px 0",background:"#0d1a2e",borderRadius:"6px",border:`1px solid ${item.includes("⚠️")?COR.red+"40":COR.brd}`,fontSize:"12px",color:item.includes("⚠️")?"#ffaaaa":"#e8f4f8",lineHeight:"1.5"}}>{item}</div>
+          ))}
+        </div>
+      ) : (
+        RESUMO_COMPLETO.map((bloco,i) => (
+          <div key={i} style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderLeft:`4px solid ${bloco.cor}`,borderRadius:"8px",padding:"12px",marginBottom:"10px"}}>
+            <div style={{fontSize:"13px",fontWeight:"bold",color:COR.gold,marginBottom:"8px",borderBottom:`1px solid ${COR.brd}`,paddingBottom:"5px"}}>📌 {bloco.titulo}</div>
+            {bloco.itens.map((item,j) => (
+              <div key={j} style={{padding:"4px 0 4px 8px",fontSize:"12px",color:item.includes("⚠️")?"#ffaaaa":"#c8dce8",borderBottom:j<bloco.itens.length-1?`1px solid ${COR.brd}20`:"none"}}>
+                {item.includes("⚠️") ? item : `• ${item}`}
+              </div>
+            ))}
+          </div>
+        ))
+      )}
+    </Wrap>
+  );
+}
+
+// ─── TÓPICO ───────────────────────────────────────────────────────────────────
+function Topico({topic, savedQuiz, onBack, onBackQuiz}) {
+  if (!topic) return null;
+  const MBox = ({tipo, titulo, texto}) => {
+    const cores = {
+      mnemo: {bg:"#0a1020", bd:COR.accent+"40", tc:COR.accent},
+      dica:  {bg:"#0d1a0d", bd:COR.green+"40",  tc:COR.green},
+      peg:   {bg:"#1a0808", bd:COR.red+"50",    tc:"#ff9999"}
+    };
+    const c = cores[tipo] || cores.dica;
+    return (
+      <div style={{background:c.bg,border:`1px solid ${c.bd}`,borderRadius:"8px",padding:"12px",marginBottom:"8px"}}>
+        <div style={{fontSize:"12px",fontWeight:"bold",color:c.tc,marginBottom:"4px"}}>{titulo}</div>
+        <div style={{fontSize:"12px",color:"#e8c8cc",lineHeight:"1.6",whiteSpace:"pre-line"}}>{texto}</div>
+      </div>
+    );
+  };
+  const mnemos = (topic.mnemonicos||[]).filter(m=>m.tipo==="mnemo");
+  const dicas  = (topic.mnemonicos||[]).filter(m=>m.tipo==="dica");
+  const pegs   = (topic.mnemonicos||[]).filter(m=>m.tipo==="peg");
+  return (
+    <Wrap>
+      <div style={{display:"flex",gap:"8px",marginBottom:"12px",flexWrap:"wrap"}}>
+        <button style={sBtnS} onClick={onBack}>← Início</button>
+        {savedQuiz && <button style={{...sBtnS,borderColor:COR.orange,color:COR.orange}} onClick={onBackQuiz}>↩ Continuar Exercício</button>}
+      </div>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",marginBottom:"12px",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}}>{topic.icon} {topic.title}</div>
+      {topic.subtopics.map((s,i)=>(
+        <div key={i} style={{background:"#0d1a2e",border:`1px solid ${COR.brd}`,borderRadius:"8px",padding:"12px",marginBottom:"8px"}}>
+          <div style={{fontSize:"13px",fontWeight:"bold",color:COR.accent,marginBottom:"5px"}}>{s.title}</div>
+          <div style={{fontSize:"12px",color:"#c8dce8",lineHeight:"1.7",whiteSpace:"pre-line"}}>{s.text}</div>
+        </div>
+      ))}
+      {mnemos.length>0&&<><div style={{fontSize:"14px",color:COR.accent,fontWeight:"bold",marginTop:"16px",marginBottom:"4px",borderLeft:`3px solid ${COR.accent}`,paddingLeft:"8px"}}>🧠 Mnemônicos</div>{mnemos.map((m,i)=><MBox key={i} tipo={m.tipo} titulo={m.titulo} texto={m.texto}/>)}</>}
+      {dicas.length>0&&<><div style={{fontSize:"14px",color:COR.green,fontWeight:"bold",marginTop:"12px",marginBottom:"4px",borderLeft:`3px solid ${COR.green}`,paddingLeft:"8px"}}>📝 Dicas de Fixação</div>{dicas.map((m,i)=><MBox key={i} tipo={m.tipo} titulo={m.titulo} texto={m.texto}/>)}</>}
+      {pegs.length>0&&<><div style={{fontSize:"14px",color:COR.red,fontWeight:"bold",marginTop:"12px",marginBottom:"4px",borderLeft:`3px solid ${COR.red}`,paddingLeft:"8px"}}>⚠️ Pegadinhas</div>{pegs.map((m,i)=><MBox key={i} tipo={m.tipo} titulo={m.titulo} texto={m.texto}/>)}</>}
+    </Wrap>
+  );
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function Home({goContent, startQuiz, exercRef}) {
+  return (
+    <Wrap>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",marginBottom:"12px",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}}>📖 Ferramentas de Estudo</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(145px,1fr))",gap:"10px",marginBottom:"20px"}}>
+        {[
+          {icon:"⚡",label:"Super Resumo",  sub:"Pontos-chave",        v:"resumo-super"},
+          {icon:"📋",label:"Resumo Completo",sub:"Todos os tópicos",   v:"resumo-completo"},
+          {icon:"🧠",label:"Mapa Mental",   sub:"Visualize a matéria", v:"mapa"},
+          {icon:"🃏",label:"Flashcards",    sub:"30 cartões",          v:"flashcards"},
+          {icon:"📄",label:"PDF Original",  sub:"Com busca de palavras",v:"pdf"}
+        ].map((item,i)=>(
+          <div key={i} style={{background:COR.card,border:`1px solid ${COR.gold}40`,borderRadius:"8px",padding:"14px",cursor:"pointer",borderLeft:`4px solid ${COR.gold}`,textAlign:"center"}} onClick={()=>startQuiz(item.v)}>
+            <div style={{fontSize:"24px",marginBottom:"4px"}}>{item.icon}</div>
+            <div style={{fontSize:"12px",fontWeight:"bold",color:"#e8f4f8"}}>{item.label}</div>
+            <div style={{fontSize:"10px",color:"#7fb3c8",marginTop:"2px"}}>{item.sub}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",marginBottom:"12px",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}}>📚 Conteúdo + Mnemônicos</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:"10px",marginBottom:"20px"}}>
+        {TOPICS.map(t=>(
+          <div key={t.id} style={{background:COR.card,border:`1px solid ${t.color}40`,borderRadius:"8px",padding:"14px",cursor:"pointer",borderLeft:`4px solid ${t.color}`}} onClick={()=>goContent(t)}>
+            <div style={{fontSize:"22px",marginBottom:"4px"}}>{t.icon}</div>
+            <div style={{fontSize:"13px",fontWeight:"bold",color:"#e8f4f8"}}>{t.title}</div>
+            <div style={{fontSize:"10px",color:"#7fb3c8",marginTop:"2px"}}>{t.subtopics.length} subtópicos · 🧠 · ⚠️ →</div>
+          </div>
+        ))}
+      </div>
+      <div style={{fontSize:"18px",color:COR.gold,fontWeight:"bold",marginBottom:"12px",borderLeft:`4px solid ${COR.gold}`,paddingLeft:"10px"}} ref={exercRef}>🎯 Exercícios</div>
+      <div style={{background:`linear-gradient(135deg,${COR.gold}15,${COR.orange}10)`,border:`2px solid ${COR.gold}`,borderRadius:"10px",padding:"16px",marginBottom:"14px",cursor:"pointer"}} onClick={()=>startQuiz("qpadrao")}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          <div style={{fontSize:"30px"}}>📄</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:"15px",fontWeight:"bold",color:COR.gold}}>Questões Padrão do Questionário</div>
+            <div style={{fontSize:"11px",color:"#c8a820",marginTop:"3px"}}>22 questões idênticas ao PDF oficial</div>
+            <div style={{fontSize:"10px",color:"#7fb3c8",marginTop:"4px"}}>Com gabarito + dicas de memorização</div>
+          </div>
+          <div style={{color:COR.gold,fontSize:"20px"}}>→</div>
+        </div>
+      </div>
+      <div style={{fontSize:"12px",color:"#7fb3c8",marginBottom:"8px"}}>Outros tipos de exercícios:</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))",gap:"10px"}}>
+        {[
+          {id:"multiple",     label:"Múltipla Escolha", icon:"🔘", n:MULTI_DATA.length},
+          {id:"truefalse",    label:"Certo ou Errado",  icon:"✅", n:TF_DATA.length},
+          {id:"complete",     label:"Complete",          icon:"✏️", n:COMPLETE_DATA.length},
+          {id:"definitions",  label:"Definições",        icon:"📖", n:DEF_DATA.length},
+          {id:"correlations", label:"Correlacione",      icon:"🔗", n:CORR_BASE.length+" conj."},
+          {id:"cite",         label:"Cite / Liste",      icon:"📋", n:CITE_DATA.length}
+        ].map(qt=>(
+          <div key={qt.id} style={{background:COR.card,border:`1px solid ${COR.accent}40`,borderRadius:"8px",padding:"14px",cursor:"pointer",borderLeft:`4px solid ${COR.accent}`,textAlign:"center"}} onClick={()=>startQuiz(qt.id)}>
+            <div style={{fontSize:"22px",marginBottom:"4px"}}>{qt.icon}</div>
+            <div style={{fontSize:"11px",fontWeight:"bold",color:"#e8f4f8"}}>{qt.label}</div>
+            <div style={{fontSize:"10px",color:"#7fb3c8",marginTop:"2px"}}>{qt.n} questões</div>
+          </div>
+        ))}
+      </div>
+    </Wrap>
+  );
+}
+
+// ─── APP PRINCIPAL ────────────────────────────────────────────────────────────
+// CORREÇÃO DEFINITIVA: um único estado `screen` substitui view + quizType.
+// Antes: setQType(type); setView("quiz") → 2 setState separados → render intermediário
+//        com view="quiz" e quizType=null → MultiplaEscolha desmonta e remonta com pos=0.
+// Agora: setScreen("quiz-multiple") → 1 setState → render único, sem remount espúrio.
+function App() {
+  const [screen, setScreen]   = useState("home");
+  const [topic, setTopic]     = useState(null);
+  const [savedQuiz, setSaved] = useState(null);
+  const [mapaExp, setMapaExp] = useState(null);
+  const [pdfSearch, setPDF]   = useState("");
+  const exercRef = useRef(null);
+
+  const nb = (ativo, cor) => ({
+    background: ativo ? (cor||COR.accent) : "transparent",
+    color: ativo ? (cor ? "#fff" : "#000") : "#7fb3c8",
+    border: `1px solid ${ativo ? (cor||COR.accent) : COR.brd}`,
+    padding:"5px 10px", borderRadius:"4px", cursor:"pointer",
+    fontSize:"10px", fontWeight: ativo ? "bold" : "normal"
+  });
+
+  const goContent = (t) => {
+    // Salva a tela atual se estiver em algum quiz
+    if (screen.startsWith("quiz-") || screen === "qpadrao") setSaved(screen);
+    setTopic(t); setScreen("topic");
+  };
+
+  const backToQuiz = () => {
+    if (!savedQuiz) return;
+    setScreen(savedQuiz);
+    setSaved(null);
+  };
+
+  const startQuiz = (type) => {
+    // Tipos que já têm nome direto de tela
+    const telas = ["resumo-super","resumo-completo","mapa","flashcards","pdf","qpadrao"];
+    if (telas.includes(type)) { setPDF(""); setScreen(type); return; }
+    // Exercícios viram "quiz-tipo" — atualização ÚNICA e ATÔMICA
+    setScreen("quiz-" + type);
+  };
+
+  const scrollExerc = () => {
+    setScreen("home");
+    setTimeout(() => { exercRef.current?.scrollIntoView({behavior:"smooth"}); }, 150);
+  };
+
+  const eQuiz = screen.startsWith("quiz-");
+
+  return (
+    <div style={{minHeight:"100vh",background:COR.bg,color:"#e8f4f8",fontFamily:"Georgia,serif"}}>
+      {/* Cabeçalho */}
+      <div style={{background:"linear-gradient(135deg,#0a1628,#0d2137,#0a1628)",borderBottom:`2px solid ${COR.brd}`,padding:"14px 18px",display:"flex",alignItems:"center",gap:"12px"}}>
+        <div style={{fontSize:"26px"}}>⚓</div>
+        <div>
+          <div style={{fontSize:"17px",fontWeight:"bold",color:COR.accent,letterSpacing:"2px",textTransform:"uppercase"}}>Gestão 2026 — Marinha do Brasil</div>
+          <div style={{fontSize:"10px",color:"#7fb3c8"}}>Baseado no Questionário Oficial de Gestão 2026</div>
+        </div>
+      </div>
+
+      {/* Navbar */}
+      <div style={{display:"flex",gap:"5px",padding:"8px 12px",borderBottom:`1px solid ${COR.brd}`,background:"#0d1a2e",flexWrap:"wrap"}}>
+        <button style={nb(screen==="home")}                    onClick={()=>setScreen("home")}>🏠</button>
+        <button style={nb(screen==="resumo-super")}            onClick={()=>startQuiz("resumo-super")}>⚡ Resumo</button>
+        <button style={nb(screen==="resumo-completo")}         onClick={()=>startQuiz("resumo-completo")}>📋 Completo</button>
+        <button style={nb(screen==="mapa")}                    onClick={()=>setScreen("mapa")}>🧠 Mapa</button>
+        <button style={nb(screen==="flashcards",COR.purple)}   onClick={()=>setScreen("flashcards")}>🃏 Flashcards</button>
+        <button style={nb(screen==="pdf")}                     onClick={()=>{setPDF("");setScreen("pdf");}}>📄 PDF</button>
+        {TOPICS.map(t=>(
+          <button key={t.id} style={nb(screen==="topic"&&topic?.id===t.id)} onClick={()=>goContent(t)}>
+            {t.icon} {t.title.split("—")[0].trim()}
+          </button>
+        ))}
+        <button style={nb(screen==="qpadrao",COR.gold)}  onClick={()=>setScreen("qpadrao")}>📄 Q.Padrão</button>
+        <button style={nb(eQuiz,COR.accent)}              onClick={scrollExerc}>🎯 Exercícios</button>
+        {savedQuiz && !eQuiz && screen !== "qpadrao" && (
+          <button style={{...nb(false),borderColor:COR.orange,color:COR.orange}} onClick={backToQuiz}>↩ Voltar</button>
+        )}
+      </div>
+
+      {/* Conteúdo — cada condição tem apenas UMA variável de estado */}
+      {screen==="home"              && <Home goContent={goContent} startQuiz={startQuiz} exercRef={exercRef}/>}
+      {screen==="topic"             && <Topico topic={topic} savedQuiz={savedQuiz} onBack={()=>setScreen("home")} onBackQuiz={backToQuiz}/>}
+      {screen==="resumo-super"      && <Resumo modo="super"/>}
+      {screen==="resumo-completo"   && <Resumo modo="completo"/>}
+      {screen==="mapa"              && <MapaMental exp={mapaExp} setExp={setMapaExp}/>}
+      {screen==="flashcards"        && <Flashcards key="fc"/>}
+      {screen==="pdf"               && <PDFViewer search={pdfSearch} onSearch={setPDF}/>}
+      {screen==="qpadrao"           && <QPadrao key="qp"/>}
+      {screen==="quiz-multiple"     && <MultiplaEscolha key="mul"/>}
+      {screen==="quiz-truefalse"    && <CertoErrado     key="tf"/>}
+      {screen==="quiz-complete"     && <Complete        key="co"/>}
+      {screen==="quiz-definitions"  && <Definicoes      key="df"/>}
+      {screen==="quiz-correlations" && <Correlacione    key="cr"/>}
+      {screen==="quiz-cite"         && <Cite            key="ci"/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
